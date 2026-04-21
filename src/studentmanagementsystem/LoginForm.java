@@ -145,9 +145,9 @@ try {
             if(role.equals("admin")){
         new AdminDashboard().setVisible(true);
     } else if(role.equals("professor")){
-        // new ProfessorDashboard().setVisible(true);
+        new ProfessorDashboard().setVisible(true);
     } else if(role.equals("student")){
-        // new StudentDashboard().setVisible(true);
+        new StudentDashboard().setVisible(true);
     }
         this.dispose();
     } else {
