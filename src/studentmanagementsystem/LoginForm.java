@@ -23,6 +23,7 @@ public class LoginForm extends javax.swing.JFrame {
      */
     public LoginForm() {
         initComponents();
+        
     }
 
     /**
@@ -42,6 +43,7 @@ public class LoginForm extends javax.swing.JFrame {
         txtPassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(400, 300));
 
         lblTitle.setFont(new java.awt.Font("Arial", 0, 22)); // NOI18N
         lblTitle.setText("Student Management System");
@@ -140,6 +142,13 @@ try {
             "Welcome " + username + "!", 
             "Login Successful", 
             JOptionPane.INFORMATION_MESSAGE);
+            if(role.equals("admin")){
+        new AdminDashboard().setVisible(true);
+    } else if(role.equals("professor")){
+        // new ProfessorDashboard().setVisible(true);
+    } else if(role.equals("student")){
+        // new StudentDashboard().setVisible(true);
+    }
         this.dispose();
     } else {
         JOptionPane.showMessageDialog(this, 
