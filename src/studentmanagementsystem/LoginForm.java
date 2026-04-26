@@ -125,11 +125,11 @@ if(username.isEmpty() || password.isEmpty()){
 
 try {
     Class.forName("com.mysql.cj.jdbc.Driver");
-    java.sql.Connection conn = java.sql.DriverManager.getConnection(
-        "jdbc:mysql://localhost:3306/student_management_system",
-        "root", 
-        ""
-    );
+java.sql.Connection conn = java.sql.DriverManager.getConnection(
+    "jdbc:mysql://localhost:3306/student_management_system?connectTimeout=5000&socketTimeout=5000",
+    "root", 
+    ""
+);
     
     String sql = "SELECT * FROM users WHERE username=? AND password=?";
     java.sql.PreparedStatement pst = conn.prepareStatement(sql);

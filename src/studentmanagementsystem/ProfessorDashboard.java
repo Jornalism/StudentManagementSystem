@@ -68,6 +68,7 @@ public class ProfessorDashboard extends javax.swing.JFrame {
         btnStudents.setText("My Students");
 
         btnAttendance.setText("Record Attendance");
+        btnAttendance.addActionListener(this::btnAttendanceActionPerformed);
 
         btnGrades.setText("Manage Grades");
 
@@ -162,6 +163,12 @@ public class ProfessorDashboard extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
 
+    private void btnAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAttendanceActionPerformed
+        // TODO add your handling code here:
+new AttendanceForm().setVisible(true); // ✅ CORRECT!
+    this.dispose();
+    }//GEN-LAST:event_btnAttendanceActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -195,7 +202,6 @@ public class ProfessorDashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnStudents;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JPanel panelCenter;
-    private javax.swing.JPanel panelContent;
     private javax.swing.JPanel panelContent1;
     private javax.swing.JPanel panelMenu;
     private javax.swing.JPanel panelTop;

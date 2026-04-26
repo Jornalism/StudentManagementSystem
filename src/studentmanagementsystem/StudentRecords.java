@@ -285,51 +285,99 @@ if(confirm == javax.swing.JOptionPane.YES_OPTION){
         loadStudents();
         clearFields();
         conn.close();
-    } catch(Exception e){
+     } catch(Exception e){
+    if(e.getMessage().contains("foreign key constraint")){
         javax.swing.JOptionPane.showMessageDialog(this, 
-            "Error: " + e.getMessage());
+            "Cannot delete this student!\nThis student has existing attendance or grade records.",
+            "Delete Failed",
+            javax.swing.JOptionPane.WARNING_MESSAGE);
+    } else {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Error: " + e.getMessage(),
+            "Error",
+            javax.swing.JOptionPane.ERROR_MESSAGE);
     }
+}
 }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         // TODO add your handling code here:
-if(txtStudentID.getText().isEmpty()){
+int row = tblStudents.getSelectedRow();
+if(row < 0){
     javax.swing.JOptionPane.showMessageDialog(this, 
-        "Please select a student to update!");
+        "Please select a student from the table first!",
+        "No Student Selected",
+        javax.swing.JOptionPane.WARNING_MESSAGE);
+    return;
+}
+if(txtStudentID.getText().isEmpty() || txtFullName.getText().isEmpty()){
+    javax.swing.JOptionPane.showMessageDialog(this, 
+        "Student ID and Full Name are required!",
+        "Warning",
+        javax.swing.JOptionPane.WARNING_MESSAGE);
     return;
 }
 try {
     java.sql.Connection conn = getConnection();
-    
-    // Get the original student ID from the table
-    int row = tblStudents.getSelectedRow();
     String originalID = tblStudents.getValueAt(row, 0).toString();
+    boolean idChanged = !originalID.equals(txtStudentID.getText());
     
-    // Delete old record
-    String deleteSql = "DELETE FROM students WHERE student_id=?";
-    java.sql.PreparedStatement deletePst = conn.prepareStatement(deleteSql);
-    deletePst.setString(1, originalID);
-    deletePst.executeUpdate();
-    
-    // Insert new record with updated info
-    String insertSql = "INSERT INTO students (student_id, full_name, course, section, email) VALUES (?,?,?,?,?)";
-    java.sql.PreparedStatement insertPst = conn.prepareStatement(insertSql);
-    insertPst.setString(1, txtStudentID.getText());
-    insertPst.setString(2, txtFullName.getText());
-    insertPst.setString(3, txtCourse.getText());
-    insertPst.setString(4, txtSection.getText());
-    insertPst.setString(5, txtEmail.getText());
-    insertPst.executeUpdate();
+    if(idChanged){
+        // Step 1: Disable foreign key checks
+        conn.prepareStatement("SET FOREIGN_KEY_CHECKS=0").executeUpdate();
+        
+        // Step 2: Update attendance records
+        String sqlUpdateAttendance = "UPDATE attendance SET student_id=? WHERE student_id=?";
+        java.sql.PreparedStatement pstAttendance = conn.prepareStatement(sqlUpdateAttendance);
+        pstAttendance.setString(1, txtStudentID.getText());
+        pstAttendance.setString(2, originalID);
+        pstAttendance.executeUpdate();
+        
+        // Step 3: Update grades records
+        String sqlUpdateGrades = "UPDATE grades SET student_id=? WHERE student_id=?";
+        java.sql.PreparedStatement pstGrades = conn.prepareStatement(sqlUpdateGrades);
+        pstGrades.setString(1, txtStudentID.getText());
+        pstGrades.setString(2, originalID);
+        pstGrades.executeUpdate();
+        
+        // Step 4: Update student
+        String sql = "UPDATE students SET student_id=?, full_name=?, course=?, section=?, email=? WHERE student_id=?";
+        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, txtStudentID.getText());
+        pst.setString(2, txtFullName.getText());
+        pst.setString(3, txtCourse.getText());
+        pst.setString(4, txtSection.getText());
+        pst.setString(5, txtEmail.getText());
+        pst.setString(6, originalID);
+        pst.executeUpdate();
+        
+        // Step 5: Re-enable foreign key checks
+        conn.prepareStatement("SET FOREIGN_KEY_CHECKS=1").executeUpdate();
+    } else {
+        // Just update other fields normally
+        String sql = "UPDATE students SET full_name=?, course=?, section=?, email=? WHERE student_id=?";
+        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, txtFullName.getText());
+        pst.setString(2, txtCourse.getText());
+        pst.setString(3, txtSection.getText());
+        pst.setString(4, txtEmail.getText());
+        pst.setString(5, originalID);
+        pst.executeUpdate();
+    }
     
     javax.swing.JOptionPane.showMessageDialog(this, 
-        "Student updated successfully!");
+        "Student updated successfully!",
+        "Success",
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
     loadStudents();
     clearFields();
     conn.close();
 } catch(Exception e){
     javax.swing.JOptionPane.showMessageDialog(this, 
-        "Error: " + e.getMessage());
+        "Error updating student: " + e.getMessage(),
+        "Error",
+        javax.swing.JOptionPane.ERROR_MESSAGE);
 }
     }//GEN-LAST:event_btnUpdateActionPerformed
 

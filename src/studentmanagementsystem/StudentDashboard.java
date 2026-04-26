@@ -51,7 +51,7 @@ public class StudentDashboard extends javax.swing.JFrame {
         panelTopLayout.setHorizontalGroup(
             panelTopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelTopLayout.createSequentialGroup()
-                .addContainerGap(169, Short.MAX_VALUE)
+                .addContainerGap(44, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addGap(167, 167, 167))
         );
@@ -113,7 +113,7 @@ public class StudentDashboard extends javax.swing.JFrame {
                         .addComponent(btnAttendance)
                         .addGap(36, 36, 36)
                         .addComponent(btnProfile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
                         .addComponent(btnLogout))
                     .addGroup(panelMenuLayout.createSequentialGroup()
                         .addContainerGap()
