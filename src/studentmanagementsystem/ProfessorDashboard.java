@@ -34,19 +34,66 @@ public class ProfessorDashboard extends javax.swing.JFrame {
         panelCenter = new javax.swing.JPanel();
         panelTop = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
-        panelMenu = new javax.swing.JPanel();
+        panelContent1 = new javax.swing.JPanel();
+        btnLogout = new javax.swing.JButton();
+        btnReports = new javax.swing.JButton();
+        btnGrades = new javax.swing.JButton();
         btnStudents = new javax.swing.JButton();
         btnAttendance = new javax.swing.JButton();
-        btnGrades = new javax.swing.JButton();
-        btnReports = new javax.swing.JButton();
-        btnLogout = new javax.swing.JButton();
-        panelContent1 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(800, 600));
 
         lblTitle.setFont(new java.awt.Font("Arial", 0, 22)); // NOI18N
         lblTitle.setText("Student Management System - Professor Dashboard");
+
+        btnLogout.setText("Logout");
+        btnLogout.addActionListener(this::btnLogoutActionPerformed);
+
+        btnReports.setText("View Reports");
+
+        btnGrades.setText("Manage Grades");
+        btnGrades.addActionListener(this::btnGradesActionPerformed);
+
+        btnStudents.setText("My Students");
+
+        btnAttendance.setText("Record Attendance");
+        btnAttendance.addActionListener(this::btnAttendanceActionPerformed);
+
+        javax.swing.GroupLayout panelContent1Layout = new javax.swing.GroupLayout(panelContent1);
+        panelContent1.setLayout(panelContent1Layout);
+        panelContent1Layout.setHorizontalGroup(
+            panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelContent1Layout.createSequentialGroup()
+                .addGap(33, 33, 33)
+                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(panelContent1Layout.createSequentialGroup()
+                .addGap(160, 160, 160)
+                .addGroup(panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnGrades, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnReports, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                    .addComponent(btnStudents, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(196, 196, 196))
+        );
+        panelContent1Layout.setVerticalGroup(
+            panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelContent1Layout.createSequentialGroup()
+                .addGap(58, 58, 58)
+                .addGroup(panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAttendance)
+                    .addComponent(btnStudents))
+                .addGap(61, 61, 61)
+                .addGroup(panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnReports)
+                    .addComponent(btnGrades))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 136, Short.MAX_VALUE)
+                .addComponent(btnLogout)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout panelTopLayout = new javax.swing.GroupLayout(panelTop);
         panelTop.setLayout(panelTopLayout);
@@ -55,71 +102,17 @@ public class ProfessorDashboard extends javax.swing.JFrame {
             .addGroup(panelTopLayout.createSequentialGroup()
                 .addGap(168, 168, 168)
                 .addComponent(lblTitle)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(203, Short.MAX_VALUE))
+            .addComponent(panelContent1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         panelTopLayout.setVerticalGroup(
             panelTopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelTopLayout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addComponent(lblTitle)
-                .addContainerGap(32, Short.MAX_VALUE))
-        );
-
-        btnStudents.setText("My Students");
-
-        btnAttendance.setText("Record Attendance");
-        btnAttendance.addActionListener(this::btnAttendanceActionPerformed);
-
-        btnGrades.setText("Manage Grades");
-
-        btnReports.setText("View Reports");
-
-        btnLogout.setText("Logout");
-        btnLogout.addActionListener(this::btnLogoutActionPerformed);
-
-        javax.swing.GroupLayout panelMenuLayout = new javax.swing.GroupLayout(panelMenu);
-        panelMenu.setLayout(panelMenuLayout);
-        panelMenuLayout.setHorizontalGroup(
-            panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelMenuLayout.createSequentialGroup()
-                .addGroup(panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelMenuLayout.createSequentialGroup()
-                        .addGap(37, 37, 37)
-                        .addGroup(panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnReports, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnGrades, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnStudents, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnAttendance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(panelMenuLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(62, Short.MAX_VALUE))
-        );
-        panelMenuLayout.setVerticalGroup(
-            panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelMenuLayout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addComponent(btnStudents)
-                .addGap(26, 26, 26)
-                .addComponent(btnAttendance)
-                .addGap(27, 27, 27)
-                .addComponent(btnGrades)
-                .addGap(30, 30, 30)
-                .addComponent(btnReports)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 89, Short.MAX_VALUE)
-                .addComponent(btnLogout)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                .addComponent(panelContent1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
-        );
-
-        javax.swing.GroupLayout panelContent1Layout = new javax.swing.GroupLayout(panelContent1);
-        panelContent1.setLayout(panelContent1Layout);
-        panelContent1Layout.setHorizontalGroup(
-            panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 659, Short.MAX_VALUE)
-        );
-        panelContent1Layout.setVerticalGroup(
-            panelContent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout panelCenterLayout = new javax.swing.GroupLayout(panelCenter);
@@ -128,25 +121,16 @@ public class ProfessorDashboard extends javax.swing.JFrame {
             panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelCenterLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(panelTop, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelCenterLayout.createSequentialGroup()
-                        .addComponent(panelMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panelContent1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addComponent(panelTop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         panelCenterLayout.setVerticalGroup(
             panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelCenterLayout.createSequentialGroup()
                 .addComponent(panelTop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(panelContent1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelMenu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 2, Short.MAX_VALUE))
         );
 
-        getContentPane().add(panelCenter, java.awt.BorderLayout.CENTER);
+        getContentPane().add(panelCenter, java.awt.BorderLayout.LINE_START);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -168,6 +152,12 @@ public class ProfessorDashboard extends javax.swing.JFrame {
 new AttendanceForm().setVisible(true); // ✅ CORRECT!
     this.dispose();
     }//GEN-LAST:event_btnAttendanceActionPerformed
+
+    private void btnGradesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGradesActionPerformed
+        // TODO add your handling code here:
+new GradesForm().setVisible(true);
+this.dispose();
+    }//GEN-LAST:event_btnGradesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -203,7 +193,6 @@ new AttendanceForm().setVisible(true); // ✅ CORRECT!
     private javax.swing.JLabel lblTitle;
     private javax.swing.JPanel panelCenter;
     private javax.swing.JPanel panelContent1;
-    private javax.swing.JPanel panelMenu;
     private javax.swing.JPanel panelTop;
     // End of variables declaration//GEN-END:variables
 }

@@ -24,6 +24,118 @@ public class AttendanceForm extends javax.swing.JFrame {
     loadSubjects();
     loadStudents();
     }
+    
+    private void loadSubjects() {
+    try {
+        java.sql.Connection conn = getConnection();
+        String sql = "SELECT * FROM subjects";
+        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+        java.sql.ResultSet rs = pst.executeQuery();
+        cmbSubject.removeAllItems();
+        while(rs.next()){
+            cmbSubject.addItem(rs.getString("subject_name"));
+        }
+        conn.close();
+    } catch(Exception e){
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Error loading subjects: " + e.getMessage());
+    }
+}
+    
+    
+    private void loadStudents() {
+try {
+        java.sql.Connection conn = getConnection();
+        String sql = "SELECT * FROM students";
+        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+        java.sql.ResultSet rs = pst.executeQuery();
+        
+        javax.swing.table.DefaultTableModel model = 
+            new javax.swing.table.DefaultTableModel(
+                new String[]{"Student ID", "Full Name", "Status"}, 0
+            ){
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return column == 2;
+                }
+            };
+        
+        while(rs.next()){
+            String studentId = rs.getString("student_id");
+            String fullName = rs.getString("full_name");
+            
+            // Check if attendance already saved for today
+            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+            String sqlCheck = "SELECT status FROM attendance WHERE student_id=? AND date=?";
+            java.sql.PreparedStatement pstCheck = conn.prepareStatement(sqlCheck);
+            pstCheck.setString(1, studentId);
+            pstCheck.setString(2, today);
+            java.sql.ResultSet rsCheck = pstCheck.executeQuery();
+            
+            String status = "present"; // default
+            if(rsCheck.next()){
+                status = rsCheck.getString("status"); // load saved status
+            }
+            
+            model.addRow(new Object[]{studentId, fullName, status});
+        }
+        tblAttendance.setModel(model);
+        
+        // Add dropdown for Status column
+        javax.swing.JComboBox<String> statusCombo = new javax.swing.JComboBox<>();
+        statusCombo.addItem("present");
+        statusCombo.addItem("absent");
+        statusCombo.addItem("tardy");
+        tblAttendance.getColumnModel().getColumn(2).setCellEditor(
+            new javax.swing.DefaultCellEditor(statusCombo));
+        
+        conn.close();
+    } catch(Exception e){
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Error loading students: " + e.getMessage());
+    }
+}
+    
+    private void syncStudentsToGrades(java.sql.Connection conn) {
+    try {
+        javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel) tblAttendance.getModel();
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String studentId = model.getValueAt(i, 0).toString();
+            String fullName  = model.getValueAt(i, 1).toString();
+
+            // Insert into MIDTERM if not exists
+            String sqlCheckMid = "SELECT COUNT(*) FROM midterm WHERE student_id=?";
+            java.sql.PreparedStatement pstCheckMid = conn.prepareStatement(sqlCheckMid);
+            pstCheckMid.setString(1, studentId);
+            java.sql.ResultSet rsMid = pstCheckMid.executeQuery();
+            if (rsMid.next() && rsMid.getInt(1) == 0) {
+                String sqlInsertMid = "INSERT INTO midterm (student_id, full_name) VALUES (?,?)";
+                java.sql.PreparedStatement pstMid = conn.prepareStatement(sqlInsertMid);
+                pstMid.setString(1, studentId);
+                pstMid.setString(2, fullName);
+                pstMid.executeUpdate();
+            }
+
+            // Insert into FINAL if not exists
+            String sqlCheckFin = "SELECT COUNT(*) FROM `final` WHERE student_id=?";
+            java.sql.PreparedStatement pstCheckFin = conn.prepareStatement(sqlCheckFin);
+            pstCheckFin.setString(1, studentId);
+            java.sql.ResultSet rsFin = pstCheckFin.executeQuery();
+            if (rsFin.next() && rsFin.getInt(1) == 0) {
+                String sqlInsertFin = "INSERT INTO `final` (student_id, full_name) VALUES (?,?)";
+                java.sql.PreparedStatement pstFin = conn.prepareStatement(sqlInsertFin);
+                pstFin.setString(1, studentId);
+                pstFin.setString(2, fullName);
+                pstFin.executeUpdate();
+            }
+        }
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Error syncing students: " + e.getMessage());
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -226,6 +338,9 @@ txtDate.setText(new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.uti
             pstInsert.executeUpdate();
         }
     }
+        // ✅ After saving attendance, push students to midterm and final tables
+    syncStudentsToGrades(conn);
+    
     javax.swing.JOptionPane.showMessageDialog(this, 
         "Attendance saved successfully!");
     conn.close();
@@ -249,75 +364,7 @@ this.dispose();
     );
 }
     
-    private void loadSubjects() {
-    try {
-        java.sql.Connection conn = getConnection();
-        String sql = "SELECT * FROM subjects";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-        java.sql.ResultSet rs = pst.executeQuery();
-        cmbSubject.removeAllItems();
-        while(rs.next()){
-            cmbSubject.addItem(rs.getString("subject_name"));
-        }
-        conn.close();
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "Error loading subjects: " + e.getMessage());
-    }
-}
-    
-    private void loadStudents() {
-try {
-        java.sql.Connection conn = getConnection();
-        String sql = "SELECT * FROM students";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-        java.sql.ResultSet rs = pst.executeQuery();
-        
-        javax.swing.table.DefaultTableModel model = 
-            new javax.swing.table.DefaultTableModel(
-                new String[]{"Student ID", "Full Name", "Status"}, 0
-            ){
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return column == 2;
-                }
-            };
-        
-        while(rs.next()){
-            String studentId = rs.getString("student_id");
-            String fullName = rs.getString("full_name");
-            
-            // Check if attendance already saved for today
-            String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-            String sqlCheck = "SELECT status FROM attendance WHERE student_id=? AND date=?";
-            java.sql.PreparedStatement pstCheck = conn.prepareStatement(sqlCheck);
-            pstCheck.setString(1, studentId);
-            pstCheck.setString(2, today);
-            java.sql.ResultSet rsCheck = pstCheck.executeQuery();
-            
-            String status = "present"; // default
-            if(rsCheck.next()){
-                status = rsCheck.getString("status"); // load saved status
-            }
-            
-            model.addRow(new Object[]{studentId, fullName, status});
-        }
-        tblAttendance.setModel(model);
-        
-        // Add dropdown for Status column
-        javax.swing.JComboBox<String> statusCombo = new javax.swing.JComboBox<>();
-        statusCombo.addItem("present");
-        statusCombo.addItem("absent");
-        statusCombo.addItem("tardy");
-        tblAttendance.getColumnModel().getColumn(2).setCellEditor(
-            new javax.swing.DefaultCellEditor(statusCombo));
-        
-        conn.close();
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "Error loading students: " + e.getMessage());
-    }
-}
+
     /**
      * @param args the command line arguments
      */

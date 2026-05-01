@@ -17,9 +17,13 @@ public class AdminDashboard extends javax.swing.JFrame {
      */
     public AdminDashboard() {
         initComponents();
-            setSize(800, 600);
     setLocationRelativeTo(null);
+    pack();
+    
     setTitle("Student Management System - Admin");
+    
+    tblStudents.setDefaultEditor(Object.class, null);
+    loadStudents();
     }
 
     /**
@@ -34,106 +38,322 @@ public class AdminDashboard extends javax.swing.JFrame {
         panelCenter = new javax.swing.JPanel();
         panelTop = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
-        panelMenu = new javax.swing.JPanel();
-        btnStudents = new javax.swing.JButton();
-        btnSubjects = new javax.swing.JButton();
-        btnReports = new javax.swing.JButton();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        panelInput = new javax.swing.JPanel();
+        lblStudentID = new javax.swing.JLabel();
+        lblFullName = new javax.swing.JLabel();
+        lblCourse = new javax.swing.JLabel();
+        lblSection = new javax.swing.JLabel();
+        lblEmail = new javax.swing.JLabel();
+        txtStudentID = new javax.swing.JTextField();
+        txtFullName = new javax.swing.JTextField();
+        txtCourse = new javax.swing.JTextField();
+        txtSection = new javax.swing.JTextField();
+        txtEmail = new javax.swing.JTextField();
+        btnAdd = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnUpdate = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
-        panelContent = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblStudents = new javax.swing.JTable();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txtSearch = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(800, 600));
 
-        lblTitle.setFont(new java.awt.Font("Arial", 0, 22)); // NOI18N
-        lblTitle.setText("Student Management System - Admin Dashboard");
+        panelCenter.setBackground(new java.awt.Color(255, 255, 255));
+
+        panelTop.setBackground(new java.awt.Color(102, 153, 255));
+        panelTop.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+
+        lblTitle.setBackground(new java.awt.Color(255, 255, 255));
+        lblTitle.setFont(new java.awt.Font("Times New Roman", 0, 36)); // NOI18N
+        lblTitle.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle.setText("Student Management System                               Welcome, Admin!");
 
         javax.swing.GroupLayout panelTopLayout = new javax.swing.GroupLayout(panelTop);
         panelTop.setLayout(panelTopLayout);
         panelTopLayout.setHorizontalGroup(
             panelTopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelTopLayout.createSequentialGroup()
-                .addGap(168, 168, 168)
+                .addContainerGap()
                 .addComponent(lblTitle)
-                .addContainerGap(187, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panelTopLayout.setVerticalGroup(
             panelTopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelTopLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(lblTitle)
-                .addContainerGap(24, Short.MAX_VALUE))
-        );
-
-        btnStudents.setText("Manage Students");
-        btnStudents.addActionListener(this::btnStudentsActionPerformed);
-
-        btnSubjects.setText("Manage Subjects");
-
-        btnReports.setText("View Reports");
-
-        btnLogout.setText("Logout");
-        btnLogout.addActionListener(this::btnLogoutActionPerformed);
-
-        javax.swing.GroupLayout panelMenuLayout = new javax.swing.GroupLayout(panelMenu);
-        panelMenu.setLayout(panelMenuLayout);
-        panelMenuLayout.setHorizontalGroup(
-            panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelMenuLayout.createSequentialGroup()
-                .addGroup(panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelMenuLayout.createSequentialGroup()
-                        .addGap(34, 34, 34)
-                        .addGroup(panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnStudents, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnSubjects, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnReports, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(panelMenuLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(31, Short.MAX_VALUE))
-        );
-        panelMenuLayout.setVerticalGroup(
-            panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelMenuLayout.createSequentialGroup()
-                .addGap(47, 47, 47)
-                .addComponent(btnStudents)
-                .addGap(39, 39, 39)
-                .addComponent(btnSubjects, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44)
-                .addComponent(btnReports)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 123, Short.MAX_VALUE)
-                .addComponent(btnLogout)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelTopLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout panelContentLayout = new javax.swing.GroupLayout(panelContent);
-        panelContent.setLayout(panelContentLayout);
-        panelContentLayout.setHorizontalGroup(
-            panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+        jTabbedPane1.setBackground(new java.awt.Color(102, 204, 255));
+        jTabbedPane1.setForeground(new java.awt.Color(255, 255, 255));
+        jTabbedPane1.setToolTipText("");
+
+        jPanel1.setBackground(new java.awt.Color(102, 153, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        panelInput.setBackground(new java.awt.Color(255, 255, 255));
+        panelInput.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
+
+        lblStudentID.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        lblStudentID.setText("Student ID:");
+
+        lblFullName.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        lblFullName.setText("Full Name:");
+
+        lblCourse.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        lblCourse.setText("Course:");
+
+        lblSection.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        lblSection.setText("Section:");
+
+        lblEmail.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        lblEmail.setText("Email:");
+
+        btnAdd.setBackground(new java.awt.Color(0, 255, 0));
+        btnAdd.setForeground(new java.awt.Color(255, 255, 255));
+        btnAdd.setText("Add");
+        btnAdd.addActionListener(this::btnAddActionPerformed);
+
+        btnDelete.setBackground(new java.awt.Color(255, 0, 51));
+        btnDelete.setText("Delete");
+        btnDelete.addActionListener(this::btnDeleteActionPerformed);
+
+        btnUpdate.setBackground(new java.awt.Color(51, 255, 0));
+        btnUpdate.setForeground(new java.awt.Color(255, 255, 255));
+        btnUpdate.setText("Update");
+        btnUpdate.addActionListener(this::btnUpdateActionPerformed);
+
+        btnClear.setBackground(new java.awt.Color(204, 204, 204));
+        btnClear.setText("Clear");
+        btnClear.addActionListener(this::btnClearActionPerformed);
+
+        btnLogout.setBackground(new java.awt.Color(255, 0, 51));
+        btnLogout.setForeground(new java.awt.Color(255, 255, 255));
+        btnLogout.setText("Logout");
+        btnLogout.addActionListener(this::btnLogoutActionPerformed);
+
+        javax.swing.GroupLayout panelInputLayout = new javax.swing.GroupLayout(panelInput);
+        panelInput.setLayout(panelInputLayout);
+        panelInputLayout.setHorizontalGroup(
+            panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(panelInputLayout.createSequentialGroup()
+                                .addComponent(lblFullName)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(panelInputLayout.createSequentialGroup()
+                                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(lblCourse, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lblSection, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(lblEmail))
+                                .addGap(35, 35, 35)
+                                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtSection, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtCourse)
+                                    .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.TRAILING)))
+                            .addGroup(panelInputLayout.createSequentialGroup()
+                                .addComponent(lblStudentID)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(34, 34, 34))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(panelInputLayout.createSequentialGroup()
+                                .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(panelInputLayout.createSequentialGroup()
+                                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(31, 31, 31))))
+            .addGroup(panelInputLayout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
-        panelContentLayout.setVerticalGroup(
-            panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+        panelInputLayout.setVerticalGroup(
+            panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInputLayout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblStudentID)
+                    .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelInputLayout.createSequentialGroup()
+                        .addGap(27, 27, 27)
+                        .addComponent(lblFullName))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCourse))
+                .addGap(18, 18, 18)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblSection)
+                    .addComponent(txtSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblEmail)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(30, 30, 30)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnUpdate)
+                    .addComponent(btnAdd))
+                .addGap(30, 30, 30)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnClear)
+                    .addComponent(btnDelete))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 97, Short.MAX_VALUE)
+                .addComponent(btnLogout)
+                .addGap(14, 14, 14))
         );
+
+        jPanel2.setBackground(new java.awt.Color(102, 153, 255));
+        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
+
+        tblStudents.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Student ID", "Full Name", "Course", "Section", "Email"
+            }
+        ));
+        tblStudents.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblStudentsMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblStudents);
+
+        jPanel3.setBackground(new java.awt.Color(102, 153, 255));
+        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
+
+        jLabel1.setFont(new java.awt.Font("Times New Roman", 0, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Search");
+
+        txtSearch.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSearchKeyReleased(evt);
+            }
+        });
+
+        btnSearch.setText("SEARCH");
+        btnSearch.addActionListener(this::btnSearchActionPerformed);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtSearch)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnSearch)
+                .addGap(21, 21, 21))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(20, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(panelInput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(panelInput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        jTabbedPane1.addTab("Student Records", jPanel1);
 
         javax.swing.GroupLayout panelCenterLayout = new javax.swing.GroupLayout(panelCenter);
         panelCenter.setLayout(panelCenterLayout);
         panelCenterLayout.setHorizontalGroup(
             panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panelTop, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(panelCenterLayout.createSequentialGroup()
-                .addComponent(panelMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelCenterLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(panelTop, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTabbedPane1))
+                .addContainerGap())
         );
         panelCenterLayout.setVerticalGroup(
             panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelCenterLayout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(panelTop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelMenu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 503, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         getContentPane().add(panelCenter, java.awt.BorderLayout.CENTER);
@@ -141,24 +361,294 @@ public class AdminDashboard extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void tblStudentsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblStudentsMouseClicked
+        // TODO add your handling code here:
+        int row = tblStudents.getSelectedRow();
+        if(row >= 0){
+            txtStudentID.setText(tblStudents.getValueAt(row, 0).toString());
+            txtFullName.setText(tblStudents.getValueAt(row, 1).toString());
+            txtCourse.setText(tblStudents.getValueAt(row, 2).toString());
+            txtSection.setText(tblStudents.getValueAt(row, 3).toString());
+            txtEmail.setText(tblStudents.getValueAt(row, 4).toString());
+        }
+    }//GEN-LAST:event_tblStudentsMouseClicked
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        // TODO add your handling code here:
+        if(txtStudentID.getText().isEmpty() || txtFullName.getText().isEmpty()){
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Student ID and Full Name are required!");
+            return;
+        }
+        try {
+            java.sql.Connection conn = getConnection();
+            String sql = "INSERT INTO students (student_id, full_name, course, section, email) VALUES (?,?,?,?,?)";
+            java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, txtStudentID.getText());
+            pst.setString(2, txtFullName.getText());
+            pst.setString(3, txtCourse.getText());
+            pst.setString(4, txtSection.getText());
+            pst.setString(5, txtEmail.getText());
+            pst.executeUpdate();
+            javax.swing.JOptionPane.showMessageDialog(this, "Student added successfully!");
+            loadStudents();
+            clearFields();
+            conn.close();
+        } catch(Exception e){
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Error: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    
+    private java.sql.Connection getConnection() throws Exception {
+    Class.forName("com.mysql.cj.jdbc.Driver");
+    return java.sql.DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/student_management_system",
+        "root", ""
+    );
+}
+    
+    private void loadStudents() {
+try {
+        java.sql.Connection conn = getConnection();
+        String sql = "SELECT * FROM students";
+        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+        java.sql.ResultSet rs = pst.executeQuery();
+        
+        // SET UP TABLE MODEL WITH CORRECT COLUMNS
+        javax.swing.table.DefaultTableModel model = 
+            new javax.swing.table.DefaultTableModel(
+                new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0
+            );
+        
+        while(rs.next()){
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                rs.getString("course"),
+                rs.getString("section"),
+                rs.getString("email")
+            });
+        }
+        tblStudents.setModel(model);
+        // PREVENT EDITING AFTER MODEL IS SET
+        tblStudents.setDefaultEditor(Object.class, null);
+        conn.close();
+    } catch(Exception e){
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Error loading students: " + e.getMessage());
+    }
+}
+    
+    
+    private void clearFields() {
+    txtStudentID.setText("");
+    txtFullName.setText("");
+    txtCourse.setText("");
+    txtSection.setText("");
+    txtEmail.setText("");
+}
+    
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        // TODO add your handling code here:
+        if(txtStudentID.getText().isEmpty()){
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please select a student to delete!");
+            return;
+        }
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to delete this student?",
+            "Delete", javax.swing.JOptionPane.YES_NO_OPTION);
+        if(confirm == javax.swing.JOptionPane.YES_OPTION){
+            try {
+                java.sql.Connection conn = getConnection();
+                String sql = "DELETE FROM students WHERE student_id=?";
+                java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+                pst.setString(1, txtStudentID.getText());
+                pst.executeUpdate();
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Student deleted successfully!");
+                loadStudents();
+                clearFields();
+                conn.close();
+            } catch(Exception e){
+                if(e.getMessage().contains("foreign key constraint")){
+                    javax.swing.JOptionPane.showMessageDialog(this,
+                        "Cannot delete this student!\nThis student has existing attendance or grade records.",
+                        "Delete Failed",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(this,
+                        "Error: " + e.getMessage(),
+                        "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void searchStudents(String keyword) {
+    try {
+        java.sql.Connection conn = getConnection();
+
+        String sql = "SELECT * FROM students WHERE " +
+                     "student_id LIKE ? OR " +
+                     "full_name LIKE ? OR " +
+                     "course LIKE ? OR " +
+                     "section LIKE ? OR " +
+                     "email LIKE ?";
+
+        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+
+        String searchValue = "%" + keyword + "%";
+
+        pst.setString(1, searchValue);
+        pst.setString(2, searchValue);
+        pst.setString(3, searchValue);
+        pst.setString(4, searchValue);
+        pst.setString(5, searchValue);
+
+        java.sql.ResultSet rs = pst.executeQuery();
+
+        javax.swing.table.DefaultTableModel model =
+            new javax.swing.table.DefaultTableModel(
+                new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0
+            );
+
+        while(rs.next()){
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                rs.getString("course"),
+                rs.getString("section"),
+                rs.getString("email")
+            });
+        }
+
+        tblStudents.setModel(model);
+        tblStudents.setDefaultEditor(Object.class, null);
+
+        conn.close();
+
+    } catch(Exception e){
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Search Error: " + e.getMessage());
+    }
+}
+    
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        // TODO add your handling code here:
+        int row = tblStudents.getSelectedRow();
+        if(row < 0){
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please select a student from the table first!",
+                "No Student Selected",
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if(txtStudentID.getText().isEmpty() || txtFullName.getText().isEmpty()){
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Student ID and Full Name are required!",
+                "Warning",
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            java.sql.Connection conn = getConnection();
+            String originalID = tblStudents.getValueAt(row, 0).toString();
+            boolean idChanged = !originalID.equals(txtStudentID.getText());
+
+            if(idChanged){
+                // Step 1: Disable foreign key checks
+                conn.prepareStatement("SET FOREIGN_KEY_CHECKS=0").executeUpdate();
+
+                // Step 2: Update attendance records
+                String sqlUpdateAttendance = "UPDATE attendance SET student_id=? WHERE student_id=?";
+                java.sql.PreparedStatement pstAttendance = conn.prepareStatement(sqlUpdateAttendance);
+                pstAttendance.setString(1, txtStudentID.getText());
+                pstAttendance.setString(2, originalID);
+                pstAttendance.executeUpdate();
+
+                // Step 3: Update grades records
+                String sqlUpdateGrades = "UPDATE grades SET student_id=? WHERE student_id=?";
+                java.sql.PreparedStatement pstGrades = conn.prepareStatement(sqlUpdateGrades);
+                pstGrades.setString(1, txtStudentID.getText());
+                pstGrades.setString(2, originalID);
+                pstGrades.executeUpdate();
+
+                // Step 4: Update student
+                String sql = "UPDATE students SET student_id=?, full_name=?, course=?, section=?, email=? WHERE student_id=?";
+                java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+                pst.setString(1, txtStudentID.getText());
+                pst.setString(2, txtFullName.getText());
+                pst.setString(3, txtCourse.getText());
+                pst.setString(4, txtSection.getText());
+                pst.setString(5, txtEmail.getText());
+                pst.setString(6, originalID);
+                pst.executeUpdate();
+
+                // Step 5: Re-enable foreign key checks
+                conn.prepareStatement("SET FOREIGN_KEY_CHECKS=1").executeUpdate();
+            } else {
+                // Just update other fields normally
+                String sql = "UPDATE students SET full_name=?, course=?, section=?, email=? WHERE student_id=?";
+                java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+                pst.setString(1, txtFullName.getText());
+                pst.setString(2, txtCourse.getText());
+                pst.setString(3, txtSection.getText());
+                pst.setString(4, txtEmail.getText());
+                pst.setString(5, originalID);
+                pst.executeUpdate();
+            }
+
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Student updated successfully!",
+                "Success",
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            loadStudents();
+            clearFields();
+            conn.close();
+        } catch(Exception e){
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Error updating student: " + e.getMessage(),
+                "Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        clearFields();
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnClearActionPerformed
+
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         // TODO add your handling code here:
-         int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-        "Are you sure you want to logout?",
-        "Logout",
-        javax.swing.JOptionPane.YES_NO_OPTION);
-    if(confirm == javax.swing.JOptionPane.YES_OPTION){
-        new studentmanagementsystem.LoginForm().setVisible(true);
+        new LoginForm().setVisible(true);
         this.dispose();
-    }
     }//GEN-LAST:event_btnLogoutActionPerformed
 
-    private void btnStudentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStudentsActionPerformed
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         // TODO add your handling code here:
-        new StudentRecords().setVisible(true);
-this.dispose();
-    }//GEN-LAST:event_btnStudentsActionPerformed
+        String keyword = txtSearch.getText();
 
+    if(keyword.isEmpty()){
+        loadStudents(); // if empty search, reload all
+    } else {
+        searchStudents(keyword);
+    }
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
+        // TODO add your handling code here:
+        if(txtSearch.getText().isEmpty()){
+        loadStudents();
+    }
+    }//GEN-LAST:event_txtSearchKeyReleased
+
+   
+
+    
     /**
      * @param args the command line arguments
      */
@@ -185,14 +675,33 @@ this.dispose();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnLogout;
-    private javax.swing.JButton btnReports;
-    private javax.swing.JButton btnStudents;
-    private javax.swing.JButton btnSubjects;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnUpdate;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JLabel lblCourse;
+    private javax.swing.JLabel lblEmail;
+    private javax.swing.JLabel lblFullName;
+    private javax.swing.JLabel lblSection;
+    private javax.swing.JLabel lblStudentID;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JPanel panelCenter;
-    private javax.swing.JPanel panelContent;
-    private javax.swing.JPanel panelMenu;
+    private javax.swing.JPanel panelInput;
     private javax.swing.JPanel panelTop;
+    private javax.swing.JTable tblStudents;
+    private javax.swing.JTextField txtCourse;
+    private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtFullName;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JTextField txtSection;
+    private javax.swing.JTextField txtStudentID;
     // End of variables declaration//GEN-END:variables
 }
