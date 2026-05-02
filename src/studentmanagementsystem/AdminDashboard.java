@@ -50,13 +50,13 @@ public class AdminDashboard extends javax.swing.JFrame {
         txtStudentID = new javax.swing.JTextField();
         txtFullName = new javax.swing.JTextField();
         txtCourse = new javax.swing.JTextField();
-        txtSection = new javax.swing.JTextField();
         txtEmail = new javax.swing.JTextField();
         btnAdd = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
+        cmbSection = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -108,7 +108,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         panelCenter.setBackground(new java.awt.Color(255, 255, 255));
 
         panelTop.setBackground(new java.awt.Color(102, 153, 255));
-        panelTop.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        panelTop.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
 
         lblTitle.setBackground(new java.awt.Color(255, 255, 255));
         lblTitle.setFont(new java.awt.Font("Times New Roman", 0, 36)); // NOI18N
@@ -180,10 +180,16 @@ public class AdminDashboard extends javax.swing.JFrame {
         btnLogout.setText("Logout");
         btnLogout.addActionListener(this::btnLogoutActionPerformed);
 
+        cmbSection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "2M" }));
+
         javax.swing.GroupLayout panelInputLayout = new javax.swing.GroupLayout(panelInput);
         panelInput.setLayout(panelInputLayout);
         panelInputLayout.setHorizontalGroup(
             panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelInputLayout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
                 .addContainerGap(17, Short.MAX_VALUE)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,9 +207,9 @@ public class AdminDashboard extends javax.swing.JFrame {
                                     .addComponent(lblEmail))
                                 .addGap(35, 35, 35)
                                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtSection, javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(txtCourse)
-                                    .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.TRAILING)))
+                                    .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(cmbSection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(panelInputLayout.createSequentialGroup()
                                 .addComponent(lblStudentID)
                                 .addGap(18, 18, 18)
@@ -220,10 +226,6 @@ public class AdminDashboard extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(31, 31, 31))))
-            .addGroup(panelInputLayout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
         );
         panelInputLayout.setVerticalGroup(
             panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -246,7 +248,7 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSection)
-                    .addComponent(txtSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmbSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblEmail)
@@ -819,7 +821,7 @@ public class AdminDashboard extends javax.swing.JFrame {
             txtStudentID.setText(tblStudents.getValueAt(row, 0).toString());
             txtFullName.setText(tblStudents.getValueAt(row, 1).toString());
             txtCourse.setText(tblStudents.getValueAt(row, 2).toString());
-            txtSection.setText(tblStudents.getValueAt(row, 3).toString());
+            cmbSection.setSelectedItem(tblStudents.getValueAt(row, 3).toString());
             txtEmail.setText(tblStudents.getValueAt(row, 4).toString());
         }
     }//GEN-LAST:event_tblStudentsMouseClicked
@@ -838,7 +840,7 @@ public class AdminDashboard extends javax.swing.JFrame {
             pst.setString(1, txtStudentID.getText());
             pst.setString(2, txtFullName.getText());
             pst.setString(3, txtCourse.getText());
-            pst.setString(4, txtSection.getText());
+            pst.setString(4, cmbSection.getSelectedItem().toString());
             pst.setString(5, txtEmail.getText());
             pst.executeUpdate();
             javax.swing.JOptionPane.showMessageDialog(this, "Student added successfully!");
@@ -897,7 +899,7 @@ try {
     txtStudentID.setText("");
     txtFullName.setText("");
     txtCourse.setText("");
-    txtSection.setText("");
+    cmbSection.setSelectedItem(null);
     txtEmail.setText("");
 }
     
@@ -1034,7 +1036,7 @@ try {
                 pst.setString(1, txtStudentID.getText());
                 pst.setString(2, txtFullName.getText());
                 pst.setString(3, txtCourse.getText());
-                pst.setString(4, txtSection.getText());
+                pst.setString(4, cmbSection.getSelectedItem().toString());
                 pst.setString(5, txtEmail.getText());
                 pst.setString(6, originalID);
                 pst.executeUpdate();
@@ -1047,7 +1049,7 @@ try {
                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
                 pst.setString(1, txtFullName.getText());
                 pst.setString(2, txtCourse.getText());
-                pst.setString(3, txtSection.getText());
+                pst.setString(3, cmbSection.getSelectedItem().toString());
                 pst.setString(4, txtEmail.getText());
                 pst.setString(5, originalID);
                 pst.executeUpdate();
@@ -1325,7 +1327,7 @@ private void loadSubjects() {
 }
 
 
-// this code for vire reports *****************************************************************************
+// this code for view reports *****************************************************************************
 
 private void loadStudentListReport() {
     try {
@@ -1404,6 +1406,7 @@ private void loadStudentListReport() {
     private javax.swing.JButton btnSearchSubjects;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnUpdate1;
+    private javax.swing.JComboBox<String> cmbSection;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
@@ -1452,7 +1455,6 @@ private void loadStudentListReport() {
     private javax.swing.JTextField txtFullName1;
     private javax.swing.JTextField txtSearchStudent;
     private javax.swing.JTextField txtSearchSubjects;
-    private javax.swing.JTextField txtSection;
     private javax.swing.JTextField txtSection1;
     private javax.swing.JTextField txtStudentID;
     private javax.swing.JTextField txtStudentID1;
