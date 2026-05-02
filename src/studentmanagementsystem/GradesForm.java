@@ -408,6 +408,7 @@ public class GradesForm extends javax.swing.JFrame {
         cmbPeriod.addItemListener(this::cmbPeriodItemStateChanged);
 
         cmbSubject.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbSubject.addActionListener(this::cmbSubjectActionPerformed);
 
         javax.swing.GroupLayout panelFilterLayout = new javax.swing.GroupLayout(panelFilter);
         panelFilter.setLayout(panelFilterLayout);
@@ -534,6 +535,10 @@ public class GradesForm extends javax.swing.JFrame {
         new ProfessorDashboard().setVisible(true);
 this.dispose();
     }//GEN-LAST:event_btnBackActionPerformed
+
+    private void cmbSubjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSubjectActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbSubjectActionPerformed
 
 
     public static void main(String args[]) {
