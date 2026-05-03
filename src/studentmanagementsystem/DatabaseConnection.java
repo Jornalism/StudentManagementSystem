@@ -13,21 +13,12 @@ import java.sql.SQLException;
  * @author nico
  */
 public class DatabaseConnection {
-     private static final String URL = "jdbc:mysql://localhost:3306/student_management_system";
+    private static final String URL = "jdbc:mysql://localhost:3306/student_management_system";
     private static final String USER = "root";
     private static final String PASSWORD = ""; // Your MySQL password
     
-    public static Connection getConnection() {
-        Connection conn = null;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
-            javax.swing.JOptionPane.showMessageDialog(null, 
-                "Database Connection Failed: " + e.getMessage(),
-                "Error", 
-                javax.swing.JOptionPane.ERROR_MESSAGE);
-        }
-        return conn;
+    public static Connection getConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
