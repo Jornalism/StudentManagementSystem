@@ -284,6 +284,7 @@ public class AdminDashboard extends javax.swing.JFrame {
             }
         });
 
+        btnSearchStudent.setBackground(new java.awt.Color(0, 255, 255));
         btnSearchStudent.setText("SEARCH");
         btnSearchStudent.addActionListener(this::btnSearchStudentActionPerformed);
 

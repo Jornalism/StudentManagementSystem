@@ -536,6 +536,9 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="btnSearchStudent">
                           <Properties>
+                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                              <Color blue="ff" green="ff" red="0" type="rgb"/>
+                            </Property>
                             <Property name="text" type="java.lang.String" value="SEARCH"/>
                           </Properties>
                           <Events>
