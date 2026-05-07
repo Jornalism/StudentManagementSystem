@@ -12,6 +12,8 @@ import java.sql.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -45,15 +47,20 @@ private static final int COL_FINAL_REMARKS  = 13;
      */
     public ProfessorDashboard() {
         initComponents();
-    setSize(800, 600);
+    setSize(1065, 665);       
+    setResizable(false); 
     setLocationRelativeTo(null);
-    loadSubjectsIntoComboBox();
+   loadCoursesAndSectionsForReports();
     setTitle("Student Management System - Professor");
     
      // === Initialize Record Attendance tab ===
     loadSubjectsForAttendance();
     setCurrentDate();
-
+    cleanupOrphanedAttendance();
+    loadCoursesAndSectionsForAttendance(); 
+    loadCoursesAndSectionsForGrades();
+cmbReportCourse.addActionListener(e -> refreshReport());
+cmbReportSection.addActionListener(e -> refreshReport());
     // === Add action listeners for attendance buttons ===
     btnAllPresent.addActionListener(e -> markAllPresent());
     btnAllAbsent.addActionListener(e -> markAllAbsent());
@@ -62,17 +69,14 @@ private static final int COL_FINAL_REMARKS  = 13;
     btnView.addActionListener(e -> viewAttendanceHistory());
 
     // Reload students when subject changes
-    cmbSubject4.addActionListener(e -> loadStudentsForAttendance());
+    cmbSubjectAttendance.addActionListener(e -> loadStudentsForAttendance());
 
-    // Update summary when status cell is edited
-    tblRecord.getModel().addTableModelListener(e -> {
-        if (e.getColumn() == 2) {
-            updateAttendanceSummary();
-        }
-    });
+  
     
     // === Initialize Manage Grades tab ===
 loadSubjectsForGrades();
+cmbCourseGrades.addActionListener(e -> loadGradesData());   // course filter
+cmbSectionGrades.addActionListener(e -> loadGradesData()); // section filter
 cmbPeriod.addItemListener(e -> {
     if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
         loadGradesData();
@@ -83,12 +87,52 @@ btnCompute.addActionListener(e -> computeAllGrades());
 btnSave1.addActionListener(e -> saveGradesData());
 btnReset5.addActionListener(e -> resetGradesData());
 
+
 // Track when user edits editable columns in Manage Grades
 tblGrades.getModel().addTableModelListener(e -> {
     if (e.getColumn() >= COL_ATTENDANCE && e.getColumn() <= COL_EXAM) {
         gradesDirty = true;
     }
 });
+
+// === Initialize View Reports tab ===
+cmbReportType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
+    "Student List", "Attendance Report", "Grade Report Midterm", "Grade Report Final", "Grade Report Final Average"
+}));
+
+btnGenerate.addActionListener(e -> {
+    String selected = cmbReportType.getSelectedItem().toString();
+    switch (selected) {
+        case "Student List":
+            loadStudentListReport();
+            break;
+        case "Attendance Report":
+            loadAttendanceReport();
+            break;
+        case "Grade Report Midterm":
+            loadGradeReportMidterm();
+            break;
+        case "Grade Report Final":
+            loadGradeReportFinal();
+            break;
+        case "Grade Report Final Average":
+            loadGradeReportFinalAverage();
+            break;
+    }
+});
+btnPrint.addActionListener(e -> printReport());
+// Load default report (Student List) when the tab is first shown
+cmbReportType.setSelectedIndex(0);
+loadStudentListReport();
+
+cmbCourseMyStudent.addActionListener(e -> loadFilteredStudents());
+loadFilteredStudents();
+// Manage Grades filter listeners
+cmbSubject8.addActionListener(e -> loadGradesData());
+cmbPeriod.addActionListener(e -> loadGradesData());
+btnSearch21.addActionListener(e -> loadGradesData());
+cmbCourseAttendance.addActionListener(e -> loadStudentsForAttendance());
+cmbSectionAttendance.addActionListener(e -> loadStudentsForAttendance());
     }
 
     /**
@@ -109,12 +153,8 @@ tblGrades.getModel().addTableModelListener(e -> {
         tabMystudent = new javax.swing.JPanel();
         btnLogout = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        cmbSubject = new javax.swing.JComboBox<>();
-        lblTitle3 = new javax.swing.JLabel();
-        cmbSection1 = new javax.swing.JComboBox<>();
-        lblTitle12 = new javax.swing.JLabel();
-        lblTitle13 = new javax.swing.JLabel();
-        cmbSection2 = new javax.swing.JComboBox<>();
+        lblTitle6 = new javax.swing.JLabel();
+        cmbCourseMyStudent = new javax.swing.JComboBox<>();
         jPanel8 = new javax.swing.JPanel();
         lblTitle5 = new javax.swing.JLabel();
         txtMySearch = new javax.swing.JTextField();
@@ -135,12 +175,12 @@ tblGrades.getModel().addTableModelListener(e -> {
         jScrollPane2 = new javax.swing.JScrollPane();
         tblRecord = new javax.swing.JTable();
         jPanel17 = new javax.swing.JPanel();
-        cmbSubject4 = new javax.swing.JComboBox<>();
+        cmbSubjectAttendance = new javax.swing.JComboBox<>();
         lblTitle4 = new javax.swing.JLabel();
-        cmbCourserecord = new javax.swing.JComboBox<>();
+        cmbCourseAttendance = new javax.swing.JComboBox<>();
         lblTitle14 = new javax.swing.JLabel();
         lblTitle15 = new javax.swing.JLabel();
-        cmbSection4 = new javax.swing.JComboBox<>();
+        cmbSectionAttendance = new javax.swing.JComboBox<>();
         lblDate = new javax.swing.JLabel();
         txtDate = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
@@ -160,24 +200,30 @@ tblGrades.getModel().addTableModelListener(e -> {
         jPanel21 = new javax.swing.JPanel();
         cmbSubject8 = new javax.swing.JComboBox<>();
         lblTitle25 = new javax.swing.JLabel();
-        cmbCourserecord4 = new javax.swing.JComboBox<>();
         lblTitle26 = new javax.swing.JLabel();
-        lblTitle27 = new javax.swing.JLabel();
-        cmbSection8 = new javax.swing.JComboBox<>();
-        cmbPeriod = new javax.swing.JComboBox<>();
+        lblTitle29 = new javax.swing.JLabel();
+        cmbSectionGrades = new javax.swing.JComboBox<>();
         lblTitle28 = new javax.swing.JLabel();
+        cmbPeriod = new javax.swing.JComboBox<>();
+        cmbCourseGrades = new javax.swing.JComboBox<>();
         btnCompute = new javax.swing.JButton();
         btnSave1 = new javax.swing.JButton();
         btnReset5 = new javax.swing.JButton();
+        jPanel22 = new javax.swing.JPanel();
+        lblTitle27 = new javax.swing.JLabel();
+        txtSearch5 = new javax.swing.JTextField();
+        btnSearch21 = new javax.swing.JButton();
         tabViewreport = new javax.swing.JPanel();
         btnLogout3 = new javax.swing.JButton();
         jPanel13 = new javax.swing.JPanel();
-        cmbSubject3 = new javax.swing.JComboBox<>();
-        lblTitle9 = new javax.swing.JLabel();
-        jPanel14 = new javax.swing.JPanel();
-        lblTitle10 = new javax.swing.JLabel();
-        txtMySearch3 = new javax.swing.JTextField();
-        btnMysearch3 = new javax.swing.JButton();
+        cmbReportType = new javax.swing.JComboBox<>();
+        lblReportType = new javax.swing.JLabel();
+        btnGenerate = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
+        lblReportType1 = new javax.swing.JLabel();
+        cmbReportCourse = new javax.swing.JComboBox<>();
+        lblReportType2 = new javax.swing.JLabel();
+        cmbReportSection = new javax.swing.JComboBox<>();
         jPanel15 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         tblMystudent3 = new javax.swing.JTable();
@@ -198,7 +244,7 @@ tblGrades.getModel().addTableModelListener(e -> {
         lblTitle1.setBackground(new java.awt.Color(255, 255, 255));
         lblTitle1.setFont(new java.awt.Font("Times New Roman", 0, 36)); // NOI18N
         lblTitle1.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle1.setText("Student Management System                         Welcome, Professor!");
+        lblTitle1.setText("Student Management System                                 Welcome, Professor!");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -206,15 +252,12 @@ tblGrades.getModel().addTableModelListener(e -> {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblTitle1, javax.swing.GroupLayout.PREFERRED_SIZE, 944, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(lblTitle1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblTitle1, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(lblTitle1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -228,10 +271,10 @@ tblGrades.getModel().addTableModelListener(e -> {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         tabMystudent.setBackground(new java.awt.Color(102, 153, 255));
@@ -245,57 +288,31 @@ tblGrades.getModel().addTableModelListener(e -> {
         jPanel3.setBackground(new java.awt.Color(102, 153, 255));
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
 
-        cmbSubject.addActionListener(this::cmbSubjectActionPerformed);
+        lblTitle6.setBackground(new java.awt.Color(255, 255, 255));
+        lblTitle6.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        lblTitle6.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle6.setText("Course:");
 
-        lblTitle3.setBackground(new java.awt.Color(255, 255, 255));
-        lblTitle3.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        lblTitle3.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle3.setText("    Subject:");
-
-        cmbSection1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "BSIT" }));
-
-        lblTitle12.setBackground(new java.awt.Color(255, 255, 255));
-        lblTitle12.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        lblTitle12.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle12.setText("Course:");
-
-        lblTitle13.setBackground(new java.awt.Color(255, 255, 255));
-        lblTitle13.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        lblTitle13.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle13.setText("Section:");
-
-        cmbSection2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "2M" }));
+        cmbCourseMyStudent.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "ACT", "BSCS", "BSIT" }));
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(lblTitle3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbSubject, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44)
-                .addComponent(lblTitle12)
+                .addContainerGap()
+                .addComponent(lblTitle6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbSection1, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblTitle13)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbSection2, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 135, Short.MAX_VALUE))
+                .addComponent(cmbCourseMyStudent, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmbSubject, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTitle3)
-                    .addComponent(cmbSection1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTitle12)
-                    .addComponent(lblTitle13)
-                    .addComponent(cmbSection2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblTitle6)
+                    .addComponent(cmbCourseMyStudent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -327,7 +344,7 @@ tblGrades.getModel().addTableModelListener(e -> {
                 .addComponent(txtMySearch, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnMysearch, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(395, Short.MAX_VALUE))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -543,7 +560,7 @@ tblGrades.getModel().addTableModelListener(e -> {
         lblTitle4.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle4.setText("  Subject:");
 
-        cmbCourserecord.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "BSIT" }));
+        cmbCourseAttendance.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "ACT", "BSCS", "BSIT" }));
 
         lblTitle14.setBackground(new java.awt.Color(255, 255, 255));
         lblTitle14.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
@@ -555,7 +572,7 @@ tblGrades.getModel().addTableModelListener(e -> {
         lblTitle15.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle15.setText("Section:");
 
-        cmbSection4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "2M" }));
+        cmbSectionAttendance.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All" }));
 
         lblDate.setBackground(new java.awt.Color(255, 255, 255));
         lblDate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
@@ -570,15 +587,15 @@ tblGrades.getModel().addTableModelListener(e -> {
                 .addGap(14, 14, 14)
                 .addComponent(lblTitle4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbSubject4, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbSubjectAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTitle14)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbCourserecord, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbCourseAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblTitle15)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbSection4, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbSectionAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblDate, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -590,12 +607,12 @@ tblGrades.getModel().addTableModelListener(e -> {
             .addGroup(jPanel17Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmbSubject4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbSubjectAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTitle4)
-                    .addComponent(cmbCourserecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbCourseAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTitle14)
                     .addComponent(lblTitle15)
-                    .addComponent(cmbSection4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbSectionAttendance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblDate)
                     .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
@@ -771,21 +788,17 @@ tblGrades.getModel().addTableModelListener(e -> {
         jPanel12.setLayout(jPanel12Layout);
         jPanel12Layout.setHorizontalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1017, Short.MAX_VALUE)
-            .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel12Layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(jScrollPane5)
-                    .addContainerGap()))
+            .addGroup(jPanel12Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 1005, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel12Layout.setVerticalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel12Layout.createSequentialGroup()
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(23, 23, 23)))
+            .addGroup(jPanel12Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jPanel21.setBackground(new java.awt.Color(102, 153, 255));
@@ -796,27 +809,27 @@ tblGrades.getModel().addTableModelListener(e -> {
         lblTitle25.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle25.setText("  Subject:");
 
-        cmbCourserecord4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "BSIT" }));
-
         lblTitle26.setBackground(new java.awt.Color(255, 255, 255));
         lblTitle26.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         lblTitle26.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle26.setText("Course:");
 
-        lblTitle27.setBackground(new java.awt.Color(255, 255, 255));
-        lblTitle27.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        lblTitle27.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle27.setText("Section:");
+        lblTitle29.setBackground(new java.awt.Color(255, 255, 255));
+        lblTitle29.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        lblTitle29.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle29.setText("Section:");
 
-        cmbSection8.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "2M" }));
-
-        cmbPeriod.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Midterm", "Final" }));
-        cmbPeriod.addItemListener(this::cmbPeriodItemStateChanged);
+        cmbSectionGrades.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All" }));
 
         lblTitle28.setBackground(new java.awt.Color(255, 255, 255));
         lblTitle28.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         lblTitle28.setForeground(new java.awt.Color(255, 255, 255));
         lblTitle28.setText("Period:");
+
+        cmbPeriod.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Midterm", "Final" }));
+        cmbPeriod.addItemListener(this::cmbPeriodItemStateChanged);
+
+        cmbCourseGrades.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All" }));
 
         javax.swing.GroupLayout jPanel21Layout = new javax.swing.GroupLayout(jPanel21);
         jPanel21.setLayout(jPanel21Layout);
@@ -826,20 +839,20 @@ tblGrades.getModel().addTableModelListener(e -> {
                 .addGap(14, 14, 14)
                 .addComponent(lblTitle25)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbSubject8, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbSubject8, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
                 .addComponent(lblTitle26)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbCourserecord4, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblTitle27)
+                .addComponent(cmbCourseGrades, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30)
+                .addComponent(lblTitle29)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbSection8, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cmbSectionGrades, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(lblTitle28)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel21Layout.setVerticalGroup(
             jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -848,12 +861,12 @@ tblGrades.getModel().addTableModelListener(e -> {
                 .addGroup(jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbSubject8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTitle25)
-                    .addComponent(cmbCourserecord4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTitle26)
-                    .addComponent(lblTitle27)
-                    .addComponent(cmbSection8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTitle28))
+                    .addComponent(lblTitle29)
+                    .addComponent(cmbSectionGrades, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTitle28)
+                    .addComponent(cmbPeriod)
+                    .addComponent(cmbCourseGrades, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -867,6 +880,46 @@ tblGrades.getModel().addTableModelListener(e -> {
 
         btnReset5.setBackground(new java.awt.Color(255, 153, 51));
         btnReset5.setText("Reset");
+
+        jPanel22.setBackground(new java.awt.Color(102, 153, 255));
+        jPanel22.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
+
+        lblTitle27.setBackground(new java.awt.Color(255, 255, 255));
+        lblTitle27.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        lblTitle27.setForeground(new java.awt.Color(255, 255, 255));
+        lblTitle27.setText("Search:");
+
+        btnSearch21.setText("Search");
+        btnSearch21.addActionListener(this::btnSearch21ActionPerformed);
+        btnSearch21.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                btnSearch21KeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel22Layout = new javax.swing.GroupLayout(jPanel22);
+        jPanel22.setLayout(jPanel22Layout);
+        jPanel22Layout.setHorizontalGroup(
+            jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel22Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(lblTitle27)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtSearch5, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnSearch21)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel22Layout.setVerticalGroup(
+            jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel22Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTitle27)
+                    .addComponent(txtSearch5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch21))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout tabManagegradesLayout = new javax.swing.GroupLayout(tabManagegrades);
         tabManagegrades.setLayout(tabManagegradesLayout);
@@ -890,25 +943,27 @@ tblGrades.getModel().addTableModelListener(e -> {
                 .addContainerGap()
                 .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(tabManagegradesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         tabManagegradesLayout.setVerticalGroup(
             tabManagegradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabManagegradesLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(tabManagegradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(tabManagegradesLayout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(btnLogout2))
-                    .addGroup(tabManagegradesLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(tabManagegradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnCompute)
-                            .addComponent(btnSave1)
-                            .addComponent(btnReset5))))
-                .addGap(58, 58, 58))
+                .addGap(4, 4, 4)
+                .addComponent(jPanel22, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(tabManagegradesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnLogout2)
+                    .addComponent(btnCompute)
+                    .addComponent(btnSave1)
+                    .addComponent(btnReset5))
+                .addGap(50, 50, 50))
         );
 
         jTabbedPane1.addTab("Manage Grades", tabManagegrades);
@@ -916,70 +971,75 @@ tblGrades.getModel().addTableModelListener(e -> {
         tabViewreport.setBackground(new java.awt.Color(102, 153, 255));
         tabViewreport.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
 
+        btnLogout3.setBackground(new java.awt.Color(255, 51, 51));
+        btnLogout3.setForeground(new java.awt.Color(255, 255, 255));
         btnLogout3.setText("Logout");
         btnLogout3.addActionListener(this::btnLogout3ActionPerformed);
 
         jPanel13.setBackground(new java.awt.Color(102, 153, 255));
         jPanel13.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
 
-        lblTitle9.setBackground(new java.awt.Color(255, 255, 255));
-        lblTitle9.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        lblTitle9.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle9.setText("    Subject:");
+        lblReportType.setBackground(new java.awt.Color(255, 255, 255));
+        lblReportType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        lblReportType.setForeground(new java.awt.Color(255, 255, 255));
+        lblReportType.setText("Report Type:");
+
+        btnGenerate.setBackground(new java.awt.Color(102, 255, 51));
+        btnGenerate.setText("Generate");
+
+        btnPrint.setBackground(new java.awt.Color(204, 204, 204));
+        btnPrint.setText("Print");
+
+        lblReportType1.setBackground(new java.awt.Color(255, 255, 255));
+        lblReportType1.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        lblReportType1.setForeground(new java.awt.Color(255, 255, 255));
+        lblReportType1.setText("Section:");
+
+        cmbReportCourse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All" }));
+
+        lblReportType2.setBackground(new java.awt.Color(255, 255, 255));
+        lblReportType2.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        lblReportType2.setForeground(new java.awt.Color(255, 255, 255));
+        lblReportType2.setText("Course:");
+
+        cmbReportSection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All" }));
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel13Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(lblTitle9)
+                .addGap(24, 24, 24)
+                .addComponent(lblReportType)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbSubject3, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(cmbReportType, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblReportType2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbReportCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblReportType1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbReportSection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(btnGenerate, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(19, 19, 19))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel13Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmbSubject3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTitle9))
-                .addContainerGap())
-        );
-
-        jPanel14.setBackground(new java.awt.Color(102, 153, 255));
-        jPanel14.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 255), 4));
-
-        lblTitle10.setBackground(new java.awt.Color(255, 255, 255));
-        lblTitle10.setFont(new java.awt.Font("Times New Roman", 0, 20)); // NOI18N
-        lblTitle10.setForeground(new java.awt.Color(255, 255, 255));
-        lblTitle10.setText("    Search Student:");
-
-        btnMysearch3.setText("Search");
-        btnMysearch3.addActionListener(this::btnMysearch3ActionPerformed);
-
-        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
-        jPanel14.setLayout(jPanel14Layout);
-        jPanel14Layout.setHorizontalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel14Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblTitle10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtMySearch3, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnMysearch3, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(500, Short.MAX_VALUE))
-        );
-        jPanel14Layout.setVerticalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblTitle10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addGroup(jPanel14Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtMySearch3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnMysearch3))
+                    .addComponent(cmbReportType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblReportType)
+                    .addComponent(btnGenerate)
+                    .addComponent(btnPrint)
+                    .addComponent(lblReportType1)
+                    .addComponent(cmbReportCourse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblReportType2)
+                    .addComponent(cmbReportSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -1005,14 +1065,14 @@ tblGrades.getModel().addTableModelListener(e -> {
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel15Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane4)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 1005, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel15Layout.setVerticalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel15Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1024,11 +1084,10 @@ tblGrades.getModel().addTableModelListener(e -> {
                 .addContainerGap()
                 .addGroup(tabViewreportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(tabViewreportLayout.createSequentialGroup()
-                .addGap(17, 17, 17)
+                .addGap(18, 18, 18)
                 .addComponent(btnLogout3, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1036,14 +1095,12 @@ tblGrades.getModel().addTableModelListener(e -> {
             tabViewreportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabViewreportLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnLogout3)
-                .addGap(29, 29, 29))
+                .addGap(10, 10, 10))
         );
 
         jTabbedPane1.addTab("View Reports", tabViewreport);
@@ -1055,8 +1112,8 @@ tblGrades.getModel().addTableModelListener(e -> {
             .addGroup(panelCenterLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTabbedPane1))
+                    .addComponent(jTabbedPane1)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelCenterLayout.setVerticalGroup(
@@ -1064,9 +1121,9 @@ tblGrades.getModel().addTableModelListener(e -> {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelCenterLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 544, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 543, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         getContentPane().add(panelCenter, java.awt.BorderLayout.PAGE_END);
@@ -1076,7 +1133,7 @@ tblGrades.getModel().addTableModelListener(e -> {
 
    private void loadStudentsBySubject() {
     // TEMPORARY: student_subjects table is missing, so show all students
-    loadStudents();
+    loadFilteredStudents();
     
     /* COMMENTED – will use when student_subjects table exists
     if (cmbSubject.getSelectedIndex() == -1) return;
@@ -1111,40 +1168,30 @@ tblGrades.getModel().addTableModelListener(e -> {
     */
 }
     
- private void loadSubjectsIntoComboBox() {
+
+ 
+ private void loadFilteredStudents() {
+    String selectedCourse = (String) cmbCourseMyStudent.getSelectedItem();
+    
+    String sql = "SELECT * FROM students WHERE 1=1";
+    
+    // Course filter
+    if (selectedCourse != null && !selectedCourse.equals("All") && !selectedCourse.equals(" ")) {
+        sql += " AND course = '" + selectedCourse + "'";
+    }
+    
+    
+    // Sorting: ACT → BSCS → BSIT, then by section
+    sql += " ORDER BY FIELD(course, 'ACT', 'BSCS', 'BSIT'), section ASC";
+    
     try (java.sql.Connection conn = DatabaseConnection.getConnection();
-         java.sql.PreparedStatement pst = conn.prepareStatement("SELECT subject_code, subject_name FROM subjects");
+         java.sql.PreparedStatement pst = conn.prepareStatement(sql);
          java.sql.ResultSet rs = pst.executeQuery()) {
         
-        cmbSubject.removeAllItems();
+        DefaultTableModel model = new DefaultTableModel(
+            new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0);
+        
         while (rs.next()) {
-            String subjectCode = rs.getString("subject_code");
-            String subjectName = rs.getString("subject_name");
-            cmbSubject.addItem(subjectCode + " - " + subjectName);
-        }
-        if (cmbSubject.getItemCount() > 0) {
-            cmbSubject.setSelectedIndex(0);
-            loadStudentsBySubject();
-        }
-    } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error loading subjects: " + e.getMessage());
-    }
-}
- 
- private void loadStudents() {
-try {
-        java.sql.Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT * FROM students";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-        java.sql.ResultSet rs = pst.executeQuery();
-        
-        // SET UP TABLE MODEL WITH CORRECT COLUMNS
-        javax.swing.table.DefaultTableModel model = 
-            new javax.swing.table.DefaultTableModel(
-                new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0
-            );
-        
-        while(rs.next()){
             model.addRow(new Object[]{
                 rs.getString("student_id"),
                 rs.getString("full_name"),
@@ -1154,13 +1201,11 @@ try {
             });
         }
         tblMystudent.setModel(model);
-        // PREVENT EDITING AFTER MODEL IS SET
         tblMystudent.setDefaultEditor(Object.class, null);
         updateTotalStudents();
-        conn.close();
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "Error loading students: " + e.getMessage());
+        
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading students: " + e.getMessage());
     }
 }
 
@@ -1277,27 +1322,18 @@ private void updateTotalStudents() {
           String keyword = txtMySearch.getText();
 
     if(keyword.isEmpty()){
-        loadStudents(); // if empty search, reload all
+        loadFilteredStudents(); // if empty search, reload all
     } else {
         searchStudents(keyword);
     }
     }//GEN-LAST:event_btnMysearchActionPerformed
 
-    private void btnMysearch3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMysearch3ActionPerformed
-        // TODO add your handling code here:
-       
-    }//GEN-LAST:event_btnMysearch3ActionPerformed
-
     private void txtMySearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMySearchKeyReleased
         // TODO add your handling code here:
         if(txtMySearch.getText().isEmpty()){
-        loadStudents();
+        loadFilteredStudents();
     }
     }//GEN-LAST:event_txtMySearchKeyReleased
-
-    private void cmbSubjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSubjectActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmbSubjectActionPerformed
 
     private void cmbPeriodItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbPeriodItemStateChanged
         // TODO add your handling code here:
@@ -1314,6 +1350,16 @@ private void updateTotalStudents() {
         
     }//GEN-LAST:event_btnSave1ActionPerformed
 
+    private void btnSearch21ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearch21ActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_btnSearch21ActionPerformed
+
+    private void btnSearch21KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnSearch21KeyReleased
+        // TODO add your handling code here:
+         loadGradesData();
+    }//GEN-LAST:event_btnSearch21KeyReleased
+
     
     // ==================== RECORD ATTENDANCE METHODS ====================
 
@@ -1321,14 +1367,14 @@ private void loadSubjectsForAttendance() {
     try (java.sql.Connection conn = DatabaseConnection.getConnection();
          java.sql.PreparedStatement pst = conn.prepareStatement("SELECT subject_code, subject_name FROM subjects");
          java.sql.ResultSet rs = pst.executeQuery()) {
-        cmbSubject4.removeAllItems();
+        cmbSubjectAttendance.removeAllItems();
         while (rs.next()) {
             String code = rs.getString("subject_code");
             String name = rs.getString("subject_name");
-            cmbSubject4.addItem(code + " - " + name);
+            cmbSubjectAttendance.addItem(code + " - " + name);
         }
-        if (cmbSubject4.getItemCount() > 0) {
-            cmbSubject4.setSelectedIndex(0);
+        if (cmbSubjectAttendance.getItemCount() > 0) {
+            cmbSubjectAttendance.setSelectedIndex(0);
             loadStudentsForAttendance();
         }
     } catch (Exception e) {
@@ -1336,43 +1382,159 @@ private void loadSubjectsForAttendance() {
     }
 }
 
-private void loadStudentsForAttendance() {
-    if (cmbSubject4.getSelectedIndex() == -1) return;
 
-    String selected = cmbSubject4.getSelectedItem().toString();
-    String subjectCode = selected.split(" - ")[0];
-
-    String sql = "SELECT student_id, full_name FROM students";
-
+private void cleanupOrphanedAttendance() {
     try (java.sql.Connection conn = DatabaseConnection.getConnection();
-         java.sql.PreparedStatement pst = conn.prepareStatement(sql)) {
-
-        java.sql.ResultSet rs = pst.executeQuery();
-        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
-            new String[]{"Student ID", "Full Name", "Status"}, 0
-        );
-
-        while (rs.next()) {
-            model.addRow(new Object[]{
-                rs.getString("student_id"),
-                rs.getString("full_name"),
-                ""  // empty status initially
-            });
-        }
-        tblRecord.setModel(model);   // ✅ set model first
-
-        // ✅ now set the column editors (after model is applied)
-        javax.swing.JComboBox<String> statusCombo = new javax.swing.JComboBox<>(new String[]{"", "Present", "Absent", "Late"});
-        tblRecord.getColumnModel().getColumn(2).setCellEditor(new javax.swing.DefaultCellEditor(statusCombo));
-
-        // Make Student ID and Full Name non-editable
-        tblRecord.getColumnModel().getColumn(0).setCellEditor(null);
-        tblRecord.getColumnModel().getColumn(1).setCellEditor(null);
-
-        rs.close();
-        updateAttendanceSummary();
+         java.sql.Statement stmt = conn.createStatement()) {
+        stmt.executeUpdate("DELETE FROM attendance WHERE student_id NOT IN (SELECT student_id FROM students)");
+        System.out.println("Orphaned attendance records removed.");
     } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error loading students: " + e.getMessage());
+        javax.swing.JOptionPane.showMessageDialog(this, "Error cleaning attendance: " + e.getMessage());
+    }
+}
+
+private void loadStudentsForAttendance() {
+    if (cmbSubjectAttendance.getSelectedIndex() == -1) {
+        loadAllStudentsForAttendanceWithoutSubject();
+        return;
+    }
+
+    String selected = cmbSubjectAttendance.getSelectedItem().toString();
+    String subjectCode = selected.split(" - ")[0];
+    String subjectName = selected.split(" - ")[1];
+
+    String courseFilter = (String) cmbCourseAttendance.getSelectedItem();
+    String sectionFilter = (String) cmbSectionAttendance.getSelectedItem();
+
+    String baseSql = "SELECT student_id, full_name, course, section FROM students WHERE 1=1";
+    List<String> conditions = new ArrayList<>();
+    List<String> params = new ArrayList<>();
+
+    if (courseFilter != null && !courseFilter.equals("All")
+            && !courseFilter.equals(" ") && !courseFilter.equals("No course data")) {
+        conditions.add("course = ?");
+        params.add(courseFilter);
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")
+            && !sectionFilter.equals(" ") && !sectionFilter.equals("No section data")) {
+        conditions.add("section = ?");
+        params.add(sectionFilter);
+    }
+
+    StringBuilder fullSql = new StringBuilder(baseSql);
+    if (!conditions.isEmpty()) {
+        fullSql.append(" AND ").append(String.join(" AND ", conditions));
+    }
+    fullSql.append(" ORDER BY course, section, student_id");
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(fullSql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            pst.setString(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = pst.executeQuery()) {
+            DefaultTableModel model = new DefaultTableModel(
+                new String[]{"Student ID", "Full Name", "Subject Name", "Course", "Section", "Status"}, 0);
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("student_id"),
+                    rs.getString("full_name"),
+                    subjectName,
+                    rs.getString("course"),
+                    rs.getString("section"),
+                    ""
+                });
+            }
+            tblRecord.setModel(model);
+
+            tblRecord.getModel().addTableModelListener(e -> {
+                if (e.getColumn() == 5) updateAttendanceSummary();
+            });
+
+            JComboBox<String> statusCombo =
+                new JComboBox<>(new String[]{"", "Present", "Absent", "Late"});
+            tblRecord.getColumnModel().getColumn(5).setCellEditor(
+                new DefaultCellEditor(statusCombo));
+
+            for (int i = 0; i < 5; i++) {
+                tblRecord.getColumnModel().getColumn(i).setCellEditor(null);
+            }
+
+            updateAttendanceSummary();
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading students: " + e.getMessage());
+    }
+}
+
+private void loadAllStudentsForAttendanceWithoutSubject() {
+    String courseFilter = (String) cmbCourseAttendance.getSelectedItem();
+    String sectionFilter = (String) cmbSectionAttendance.getSelectedItem();
+
+    String baseSql = "SELECT student_id, full_name, course, section FROM students WHERE 1=1";
+    List<String> conditions = new ArrayList<>();
+    List<String> params = new ArrayList<>();
+
+    if (courseFilter != null && !courseFilter.equals("All")
+            && !courseFilter.equals(" ") && !courseFilter.equals("No course data")) {
+        conditions.add("course = ?");
+        params.add(courseFilter);
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")
+            && !sectionFilter.equals(" ") && !sectionFilter.equals("No section data")) {
+        conditions.add("section = ?");
+        params.add(sectionFilter);
+    }
+
+    StringBuilder fullSql = new StringBuilder(baseSql);
+    if (!conditions.isEmpty()) {
+        fullSql.append(" AND ").append(String.join(" AND ", conditions));
+    }
+    fullSql.append(" ORDER BY course, section, student_id");
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(fullSql.toString())) {
+
+        for (int i = 0; i < params.size(); i++) {
+            pst.setString(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = pst.executeQuery()) {
+            DefaultTableModel model = new DefaultTableModel(
+                new String[]{"Student ID", "Full Name", "Subject Name", "Course", "Section", "Status"}, 0);
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("student_id"),
+                    rs.getString("full_name"),
+                    "N/A",
+                    rs.getString("course"),
+                    rs.getString("section"),
+                    ""
+                });
+            }
+            tblRecord.setModel(model);
+
+            tblRecord.getModel().addTableModelListener(e -> {
+                if (e.getColumn() == 5) updateAttendanceSummary();
+            });
+
+            JComboBox<String> statusCombo =
+                new JComboBox<>(new String[]{"", "Present", "Absent", "Late"});
+            tblRecord.getColumnModel().getColumn(5).setCellEditor(
+                new DefaultCellEditor(statusCombo));
+
+            for (int i = 0; i < 5; i++) {
+                tblRecord.getColumnModel().getColumn(i).setCellEditor(null);
+            }
+
+            updateAttendanceSummary();
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading students: " + e.getMessage());
     }
 }
 
@@ -1380,7 +1542,7 @@ private void updateAttendanceSummary() {
     int total = tblRecord.getRowCount();
     int present = 0, absent = 0, late = 0;
     for (int i = 0; i < total; i++) {
-        String status = tblRecord.getValueAt(i, 2).toString();
+        String status = tblRecord.getValueAt(i, 5).toString();  // column 5 = Status
         if (status.equals("Present")) present++;
         else if (status.equals("Absent")) absent++;
         else if (status.equals("Late")) late++;
@@ -1393,79 +1555,127 @@ private void updateAttendanceSummary() {
 
 private void markAllPresent() {
     for (int i = 0; i < tblRecord.getRowCount(); i++) {
-        tblRecord.setValueAt("Present", i, 2);
+        tblRecord.setValueAt("Present", i, 5);
     }
     updateAttendanceSummary();
 }
 
 private void markAllAbsent() {
     for (int i = 0; i < tblRecord.getRowCount(); i++) {
-        tblRecord.setValueAt("Absent", i, 2);
+        tblRecord.setValueAt("Absent", i, 5);
     }
     updateAttendanceSummary();
 }
 
 private void resetAttendanceStatus() {
     for (int i = 0; i < tblRecord.getRowCount(); i++) {
-        tblRecord.setValueAt("", i, 2);
+        tblRecord.setValueAt("", i, 5);
     }
     updateAttendanceSummary();
 }
 
+private void loadCoursesAndSectionsForAttendance() {
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement()) {
+        
+        // --- Load courses ---
+        cmbCourseAttendance.removeAllItems();
+        cmbCourseAttendance.addItem("All");   // first option
+        java.sql.ResultSet rsCourses = stmt.executeQuery("SELECT DISTINCT course FROM students WHERE course IS NOT NULL AND course != ''");
+        while (rsCourses.next()) {
+            cmbCourseAttendance.addItem(rsCourses.getString("course"));
+        }
+        if (cmbCourseAttendance.getItemCount() == 1) {
+            cmbCourseAttendance.addItem("No course data");
+        }
+        cmbCourseAttendance.setSelectedIndex(0);
+        
+        // --- Load sections ---
+        cmbSectionAttendance.removeAllItems();          // ← corrected name
+        cmbSectionAttendance.addItem("All");           // ← corrected name
+        java.sql.ResultSet rsSections = stmt.executeQuery("SELECT DISTINCT section FROM students WHERE section IS NOT NULL AND section != ''");
+        while (rsSections.next()) {
+            cmbSectionAttendance.addItem(rsSections.getString("section"));
+        }
+        if (cmbSectionAttendance.getItemCount() == 1) {
+            cmbSectionAttendance.addItem("No section data");
+        }
+        cmbSectionAttendance.setSelectedIndex(0);
+        
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error loading courses/sections: " + e.getMessage());
+    }
+}
+
 private void saveAttendance() {
-    if (cmbSubject4.getSelectedIndex() == -1) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Please select a subject.");
+    if (cmbSubjectAttendance.getSelectedIndex() == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a subject.");
         return;
     }
     if (txtDate.getText().trim().isEmpty()) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Date is required.");
+        JOptionPane.showMessageDialog(this, "Date is required.");
         return;
     }
-    
-    String selected = cmbSubject4.getSelectedItem().toString();
+
+    String course = cmbCourseAttendance.getSelectedItem().toString().trim();
+    String section = cmbSectionAttendance.getSelectedItem().toString().trim();
+
+    if (course.isEmpty() || course.equals("No course data")
+            || section.isEmpty() || section.equals("No section data")) {
+        JOptionPane.showMessageDialog(this, "Please select a valid Course and Section.");
+        return;
+    }
+
+    // 🚫 Reject "All"
+    if (course.equals("All") || section.equals("All")) {
+        JOptionPane.showMessageDialog(this, "Please select a specific Course and Section (not 'All').");
+        return;
+    }
+
+    String selected = cmbSubjectAttendance.getSelectedItem().toString();
     String subjectCode = selected.split(" - ")[0];
-    String course = cmbCourserecord.getSelectedItem().toString();
-    String section = cmbSection4.getSelectedItem().toString();
     String date = txtDate.getText().trim();
-    
-    try (java.sql.Connection conn = DatabaseConnection.getConnection()) {
-        String sql = "INSERT INTO attendance (student_id, subject_code, course, section, date, status) " +
-                     "VALUES (?, ?, ?, ?, ?, ?) " +
-                     "ON DUPLICATE KEY UPDATE status = ?";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-        
-        int saved = 0;
-        for (int i = 0; i < tblRecord.getRowCount(); i++) {
-            String studentId = tblRecord.getValueAt(i, 0).toString();
-            String status = tblRecord.getValueAt(i, 2).toString();
-            if (status == null || status.trim().isEmpty()) {
-                continue;
+
+    try (Connection conn = DatabaseConnection.getConnection()) {
+        // Updated SQL: now updates course and section as well on duplicate
+        String sql = "INSERT INTO attendance (student_id, subject_code, course, section, date, status) "
+                   + "VALUES (?, ?, ?, ?, ?, ?) "
+                   + "ON DUPLICATE KEY UPDATE status = ?, course = VALUES(course), section = VALUES(section)";
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            int saved = 0;
+            for (int i = 0; i < tblRecord.getRowCount(); i++) {
+                String studentId = tblRecord.getValueAt(i, 0).toString();
+                String status = tblRecord.getValueAt(i, 5).toString();
+                if (status == null || status.trim().isEmpty()) continue;
+
+                pst.setString(1, studentId);
+                pst.setString(2, subjectCode);
+                pst.setString(3, course);
+                pst.setString(4, section);
+                pst.setString(5, date);
+                pst.setString(6, status);
+                pst.setString(7, status);   // for UPDATE status
+                // course and section are handled by VALUES() in SQL, no extra params needed
+                pst.addBatch();
+                saved++;
             }
-            pst.setString(1, studentId);
-            pst.setString(2, subjectCode);
-            pst.setString(3, course);
-            pst.setString(4, section);
-            pst.setString(5, date);
-            pst.setString(6, status);
-            pst.setString(7, status);
-            pst.addBatch();
-            saved++;
+
+            if (saved > 0) {
+                pst.executeBatch();
+                JOptionPane.showMessageDialog(this, "Attendance saved successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "No status selected to save.");
+            }
         }
-        if (saved > 0) {
-            pst.executeBatch();
-            javax.swing.JOptionPane.showMessageDialog(this, "Attendance saved successfully!");
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "No status selected to save.");
-        }
-        conn.close();
     } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error saving attendance: " + e.getMessage());
+        JOptionPane.showMessageDialog(this, "Error saving attendance: " + e.getMessage());
     }
 }
 
 private void viewAttendanceHistory() {
     javax.swing.JDialog historyDialog = new javax.swing.JDialog(this, "Attendance History", true);
-    historyDialog.setSize(700, 400);
+    historyDialog.setSize(850, 400);   // slightly wider to fit full name
     historyDialog.setLocationRelativeTo(this);
     
     javax.swing.JTable historyTable = new javax.swing.JTable();
@@ -1475,15 +1685,20 @@ private void viewAttendanceHistory() {
     try (java.sql.Connection conn = DatabaseConnection.getConnection();
          java.sql.Statement stmt = conn.createStatement();
          java.sql.ResultSet rs = stmt.executeQuery(
-             "SELECT student_id, subject_code, course, section, date, status FROM attendance ORDER BY date DESC")) {
+             "SELECT a.student_id, st.full_name, s.subject_name, a.course, a.section, a.date, a.status " +
+             "FROM attendance a " +
+             "JOIN subjects s ON a.subject_code = s.subject_code " +
+             "JOIN students st ON a.student_id = st.student_id " +
+             "ORDER BY a.date DESC")) {
         
         javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
-            new String[]{"Student ID", "Subject", "Course", "Section", "Date", "Status"}, 0
+            new String[]{"Student ID", "Full Name", "Subject Name", "Course", "Section", "Date", "Status"}, 0
         );
         while (rs.next()) {
             model.addRow(new Object[]{
                 rs.getString("student_id"),
-                rs.getString("subject_code"),
+                rs.getString("full_name"),
+                rs.getString("subject_name"),
                 rs.getString("course"),
                 rs.getString("section"),
                 rs.getString("date"),
@@ -1525,63 +1740,84 @@ private void loadSubjectsForGrades() {
     }
 }
 
-private void loadGradesData() {
-    try {
-        if (cmbSubject8.getSelectedIndex() == -1 && cmbSubject8.getItemCount() == 0) {
-            // No subjects loaded yet, but still show students
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblGrades.getModel();
-            model.setRowCount(0);
-            String sql = "SELECT student_id, full_name FROM students";
-            try (java.sql.Connection conn = DatabaseConnection.getConnection();
-                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-                 java.sql.ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    model.addRow(new Object[]{
-                        rs.getString("student_id"),
-                        rs.getString("full_name"),
-                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                        0.0, 0.0, "", 0.0, ""
-                    });
-                }
+private void setRatingCellRenderer() {
+    // Format numbers to always show two decimal places (e.g., 1.00, 2.25)
+    javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
+        @Override
+        protected void setValue(Object value) {
+            if (value instanceof Number) {
+                setText(String.format("%.2f", ((Number) value).doubleValue()));
+            } else {
+                super.setValue(value);
             }
-            return;
         }
+    };
+    renderer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+    
+    // Apply to Period Rating column (index 10)
+    if (tblGrades.getColumnCount() > COL_PERIOD_RATING) {
+        tblGrades.getColumnModel().getColumn(COL_PERIOD_RATING).setCellRenderer(renderer);
+    }
+    // Apply to Final Average Rating column (index 12)
+    if (tblGrades.getColumnCount() > COL_FINAL_AVE) {
+        tblGrades.getColumnModel().getColumn(COL_FINAL_AVE).setCellRenderer(renderer);
+    }
+}
+
+private void loadGradesData() {
+    String period = (String) cmbPeriod.getSelectedItem();
+    if (period == null) return;
+    
+    String subjectCode = "";
+    if (cmbSubject8.getSelectedIndex() != -1 && cmbSubject8.getItemCount() > 0) {
+        String selected = cmbSubject8.getSelectedItem().toString();
+        subjectCode = selected.split(" - ")[0];
+    }
+    
+    // Get filters (use your actual combo box names)
+    String courseFilter = (String) cmbCourseGrades.getSelectedItem();   // course filter
+    String sectionFilter = (String) cmbSectionGrades.getSelectedItem(); // section filter
+    String searchKeyword = txtSearch5.getText().trim();
+    
+    // Build student query with filters
+    StringBuilder studentSql = new StringBuilder("SELECT student_id, full_name, course, section FROM students WHERE 1=1");
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        studentSql.append(" AND course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        studentSql.append(" AND section = '").append(sectionFilter).append("'");
+    }
+    if (!searchKeyword.isEmpty()) {
+        studentSql.append(" AND (student_id LIKE '%").append(searchKeyword).append("%' OR full_name LIKE '%").append(searchKeyword).append("%')");
+    }
+    studentSql.append(" ORDER BY FIELD(course, 'ACT', 'BSCS', 'BSIT'), section, student_id");
+    
+    DefaultTableModel model = (DefaultTableModel) tblGrades.getModel();
+    model.setRowCount(0);
+    
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(studentSql.toString());
+         ResultSet rs = pst.executeQuery()) {
         
-        String period = (String) cmbPeriod.getSelectedItem();
-        if (period == null) return;
+        String tableName = period.equalsIgnoreCase("Midterm") ? "midterm" : "`final`";
         
-        String subjectCode = "";
-        if (cmbSubject8.getSelectedIndex() != -1) {
-            String selected = cmbSubject8.getSelectedItem().toString();
-            subjectCode = selected.split(" - ")[0];
-        }
-
-        String sql = "SELECT student_id, full_name FROM students";
-        try (java.sql.Connection conn = DatabaseConnection.getConnection();
-             java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-             java.sql.ResultSet rs = pst.executeQuery()) {
-
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblGrades.getModel();
-            model.setRowCount(0);
-            String tableName = period.equalsIgnoreCase("Midterm") ? "midterm" : "`final`";
-
-            while (rs.next()) {
-                String studentId = rs.getString("student_id");
-                String fullName = rs.getString("full_name");
-                
-                double attendance=0, participation=0, quiz1=0, quiz2=0, quiz3=0, quiz4=0, exam=0;
-                double periodGrade=0, periodRating=0, finalAve=0;
-                String periodRemarks="", finalRemarks="";
-                
-                // Only fetch grades if we have a subject selected
-                if (!subjectCode.isEmpty()) {
-                    String fetchSql = "SELECT attendance, participation, quiz1, quiz2, quiz3, quiz4, exam_score, " +
-                                      "period_grade, period_rating, period_remarks, final_ave_rating, final_remarks " +
-                                      "FROM " + tableName + " WHERE student_id=? AND subject_code=?";
-                    java.sql.PreparedStatement pstFetch = conn.prepareStatement(fetchSql);
+        while (rs.next()) {
+            String studentId = rs.getString("student_id");
+            String fullName = rs.getString("full_name");
+            // We ignore course and section here – they are only for filtering, not displayed
+            
+            double attendance = 0, participation = 0, quiz1 = 0, quiz2 = 0, quiz3 = 0, quiz4 = 0, exam = 0;
+            double periodGrade = 0, periodRating = 0, finalAve = 0;
+            String periodRemarks = "", finalRemarks = "";
+            
+            if (!subjectCode.isEmpty()) {
+                String fetchSql = "SELECT attendance, participation, quiz1, quiz2, quiz3, quiz4, exam_score, " +
+                                  "period_grade, period_rating, period_remarks, final_ave_rating, final_remarks " +
+                                  "FROM " + tableName + " WHERE student_id=? AND subject_code=?";
+                try (PreparedStatement pstFetch = conn.prepareStatement(fetchSql)) {
                     pstFetch.setString(1, studentId);
                     pstFetch.setString(2, subjectCode);
-                    java.sql.ResultSet rsFetch = pstFetch.executeQuery();
+                    ResultSet rsFetch = pstFetch.executeQuery();
                     if (rsFetch.next()) {
                         attendance = rsFetch.getDouble("attendance");
                         participation = rsFetch.getDouble("participation");
@@ -1597,27 +1833,30 @@ private void loadGradesData() {
                         finalRemarks = rsFetch.getString("final_remarks");
                     }
                     rsFetch.close();
-                    pstFetch.close();
                 }
-                model.addRow(new Object[]{
-                    studentId, fullName,
-                    attendance, participation,
-                    quiz1, quiz2, quiz3, quiz4, exam,
-                    periodGrade, periodRating, periodRemarks,
-                    finalAve, finalRemarks
-                });
             }
-            // Set non-editable columns only if they exist
-            if (tblGrades.getColumnCount() > COL_FINAL_REMARKS) {
-                tblGrades.getColumnModel().getColumn(COL_PERIOD_GRADE).setCellEditor(null);
-                tblGrades.getColumnModel().getColumn(COL_PERIOD_RATING).setCellEditor(null);
-                tblGrades.getColumnModel().getColumn(COL_PERIOD_REMARKS).setCellEditor(null);
-                tblGrades.getColumnModel().getColumn(COL_FINAL_AVE).setCellEditor(null);
-                tblGrades.getColumnModel().getColumn(COL_FINAL_REMARKS).setCellEditor(null);
-            }
+            model.addRow(new Object[]{
+                studentId, fullName,
+                attendance, participation,
+                quiz1, quiz2, quiz3, quiz4, exam,
+                periodGrade, periodRating, periodRemarks,
+                finalAve, finalRemarks
+            });
         }
+        tblGrades.setModel(model);
+        
+        // Make non-editable columns read-only (same as before)
+        if (tblGrades.getColumnCount() > COL_FINAL_REMARKS) {
+            tblGrades.getColumnModel().getColumn(COL_PERIOD_GRADE).setCellEditor(null);
+            tblGrades.getColumnModel().getColumn(COL_PERIOD_RATING).setCellEditor(null);
+            tblGrades.getColumnModel().getColumn(COL_PERIOD_REMARKS).setCellEditor(null);
+            tblGrades.getColumnModel().getColumn(COL_FINAL_AVE).setCellEditor(null);
+            tblGrades.getColumnModel().getColumn(COL_FINAL_REMARKS).setCellEditor(null);
+        }
+        setRatingCellRenderer();
+        
     } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error loading grades: " + e.getMessage());
+        JOptionPane.showMessageDialog(this, "Error loading grades: " + e.getMessage());
         e.printStackTrace();
     }
 }
@@ -1628,6 +1867,31 @@ private String getSelectedSubjectCode() {
     }
     String selected = cmbSubject8.getSelectedItem().toString();
     return selected.split(" - ")[0];
+}
+
+private void loadCoursesAndSectionsForGrades() {
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement()) {
+        
+        // Load courses into cmbSection23 (rename to cmbCourseFilter if you want)
+        cmbCourseGrades.removeAllItems();
+        cmbCourseGrades.addItem("All");
+        java.sql.ResultSet rsCourses = stmt.executeQuery("SELECT DISTINCT course FROM students WHERE course IS NOT NULL AND course != ''");
+        while (rsCourses.next()) {
+            cmbCourseGrades.addItem(rsCourses.getString("course"));
+        }
+        
+        // Load sections into cmbCourserecord56d (rename to cmbSectionFilter if you want)
+        cmbSectionGrades.removeAllItems();
+        cmbSectionGrades.addItem("All");
+        java.sql.ResultSet rsSections = stmt.executeQuery("SELECT DISTINCT section FROM students WHERE section IS NOT NULL AND section != ''");
+        while (rsSections.next()) {
+            cmbSectionGrades.addItem(rsSections.getString("section"));
+        }
+        
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading course/section filters: " + e.getMessage());
+    }
 }
 
 private void computeAllGrades() {
@@ -1670,29 +1934,28 @@ private void computeAllGrades() {
 
 private void updateFinalAverage() {
     String currentPeriod = (String) cmbPeriod.getSelectedItem();
-    String otherPeriod = currentPeriod.equalsIgnoreCase("Midterm") ? "Final" : "Midterm";
-    String currentTable = currentPeriod.equalsIgnoreCase("Midterm") ? "midterm" : "`final`";
     String otherTable = currentPeriod.equalsIgnoreCase("Midterm") ? "`final`" : "midterm";
 
     javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblGrades.getModel();
     try (java.sql.Connection conn = DatabaseConnection.getConnection()) {
         for (int row = 0; row < model.getRowCount(); row++) {
             String studentId = model.getValueAt(row, COL_STUDENT_ID).toString();
-            double currentRating = toDouble(model.getValueAt(row, COL_PERIOD_RATING));
+            double currentGrade = toDouble(model.getValueAt(row, COL_PERIOD_GRADE));
 
-            // Get other period rating from database
-            String sql = "SELECT period_rating FROM " + otherTable + " WHERE student_id=? AND subject_code=?";
+            // Get other period's grade (0-100) from database
+            String sql = "SELECT period_grade FROM " + otherTable + " WHERE student_id=? AND subject_code=?";
             java.sql.PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, studentId);
             pst.setString(2, getSelectedSubjectCode());
             java.sql.ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
-                double otherRating = rs.getDouble("period_rating");
-                if (currentRating > 0 && otherRating > 0) {
-                    double finalAve = round2((currentRating + otherRating) / 2.0);
-                    String finalRemarks = finalAve <= 3.00 ? "Passed" : "Failed";
-                    model.setValueAt(finalAve, row, COL_FINAL_AVE);
+                double otherGrade = rs.getDouble("period_grade");
+                if (currentGrade > 0 && otherGrade > 0) {
+                    double finalGrade = round2((currentGrade + otherGrade) / 2.0);
+                    double finalRating = convertToRating(finalGrade);
+                    String finalRemarks = finalRating <= 3.00 ? "Passed" : "Failed";
+                    model.setValueAt(round2(finalRating), row, COL_FINAL_AVE);
                     model.setValueAt(finalRemarks, row, COL_FINAL_REMARKS);
                 }
             }
@@ -1708,9 +1971,8 @@ private void saveGradesData() {
     String period = (String) cmbPeriod.getSelectedItem();
     String tableName = period.equalsIgnoreCase("Midterm") ? "midterm" : "`final`";
     String subjectCode = getSelectedSubjectCode();
-    String course = cmbCourserecord4.getSelectedItem().toString();
-    String section = cmbSection8.getSelectedItem().toString();
-
+    String section = ""; // or remove from SQL
+    
     javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblGrades.getModel();
 
     try (java.sql.Connection conn = DatabaseConnection.getConnection()) {
@@ -1729,10 +1991,23 @@ private void saveGradesData() {
         java.sql.PreparedStatement pst = conn.prepareStatement(sql);
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            pst.setString(1,  model.getValueAt(row, COL_STUDENT_ID).toString());
+            String studentId = model.getValueAt(row, COL_STUDENT_ID).toString();
+            
+            // Get actual course from students table
+            String actualCourse = "";
+            String courseSql = "SELECT course FROM students WHERE student_id = ?";
+            try (PreparedStatement pstCourse = conn.prepareStatement(courseSql)) {
+                pstCourse.setString(1, studentId);
+                ResultSet rsCourse = pstCourse.executeQuery();
+                if (rsCourse.next()) {
+                    actualCourse = rsCourse.getString("course");
+                }
+            }
+            
+            pst.setString(1,  studentId);
             pst.setString(2,  model.getValueAt(row, COL_FULL_NAME).toString());
             pst.setString(3,  subjectCode);
-            pst.setString(4,  course);
+            pst.setString(4,  actualCourse);   // store actual course
             pst.setString(5,  section);
             pst.setDouble(6,  toDouble(model.getValueAt(row, COL_ATTENDANCE)));
             pst.setDouble(7,  toDouble(model.getValueAt(row, COL_PARTICIPATION)));
@@ -1818,6 +2093,302 @@ private void resetGradesData() {
     gradesDirty = true;
     javax.swing.JOptionPane.showMessageDialog(this, "Grades have been reset. Click Save to store.");
 }
+
+// ==================== VIEW REPORTS METHODS ====================
+
+private void loadStudentListReport() {
+    String courseFilter = (String) cmbReportCourse.getSelectedItem();
+    String sectionFilter = (String) cmbReportSection.getSelectedItem();
+    
+    StringBuilder sql = new StringBuilder("SELECT student_id, full_name, course, section, email FROM students WHERE 1=1");
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        sql.append(" AND course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        sql.append(" AND section = '").append(sectionFilter).append("'");
+    }
+    sql.append(" ORDER BY course, section, student_id");
+    
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.PreparedStatement pst = conn.prepareStatement(sql.toString());
+         java.sql.ResultSet rs = pst.executeQuery()) {
+        
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
+            new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0
+        );
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                rs.getString("course"),
+                rs.getString("section"),
+                rs.getString("email")
+            });
+        }
+        tblMystudent3.setModel(model);
+        tblMystudent3.setDefaultEditor(Object.class, null);
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error loading student list: " + e.getMessage());
+    }
+}
+
+private void loadAttendanceReport() {
+    String courseFilter = (String) cmbReportCourse.getSelectedItem();
+    String sectionFilter = (String) cmbReportSection.getSelectedItem();
+    
+    StringBuilder sql = new StringBuilder(
+        "SELECT s.student_id, s.full_name, " +
+        "SUM(CASE WHEN a.status = 'Present' THEN 1 ELSE 0 END) AS present_count, " +
+        "SUM(CASE WHEN a.status = 'Absent' THEN 1 ELSE 0 END) AS absent_count, " +
+        "SUM(CASE WHEN a.status = 'Late' THEN 1 ELSE 0 END) AS late_count, " +
+        "COUNT(*) AS total_days " +
+        "FROM attendance a " +
+        "JOIN students s ON a.student_id = s.student_id WHERE 1=1"
+    );
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        sql.append(" AND a.course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        sql.append(" AND a.section = '").append(sectionFilter).append("'");
+    }
+    sql.append(" GROUP BY s.student_id, s.full_name");
+    
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement();
+         java.sql.ResultSet rs = stmt.executeQuery(sql.toString())) {
+        
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
+            new String[]{"Student ID", "Full Name", "Present", "Absent", "Late", "Rate %"}, 0
+        );
+        while (rs.next()) {
+            int present = rs.getInt("present_count");
+            int total = rs.getInt("total_days");
+            double rate = total == 0 ? 0 : (present * 100.0 / total);
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                present,
+                rs.getInt("absent_count"),
+                rs.getInt("late_count"),
+                String.format("%.2f", rate) + "%"
+            });
+        }
+        tblMystudent3.setModel(model);
+        tblMystudent3.setDefaultEditor(Object.class, null);
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error loading attendance report: " + e.getMessage());
+    }
+}
+
+private void loadGradeReportMidterm() {
+    String courseFilter = (String) cmbReportCourse.getSelectedItem();
+    String sectionFilter = (String) cmbReportSection.getSelectedItem();
+    
+    StringBuilder sql = new StringBuilder(
+        "SELECT m.student_id, m.full_name, m.subject_code, 'Midterm' AS period, " +
+        "m.period_rating, m.period_remarks " +
+        "FROM midterm m " +
+        "JOIN students s ON m.student_id = s.student_id " +   // ← only existing students
+        "WHERE 1=1"
+    );
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        sql.append(" AND m.course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        sql.append(" AND m.section = '").append(sectionFilter).append("'");
+    }
+    sql.append(" ORDER BY m.student_id, m.subject_code");
+    
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement();
+         java.sql.ResultSet rs = stmt.executeQuery(sql.toString())) {
+        
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
+            new String[]{"Student ID", "Full Name", "Subject", "Period", "Period Rating", "Period Remarks"}, 0
+        );
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                rs.getString("subject_code"),
+                rs.getString("period"),
+                String.format("%.2f", rs.getDouble("period_rating")),
+                rs.getString("period_remarks")
+            });
+        }
+        tblMystudent3.setModel(model);
+        tblMystudent3.setDefaultEditor(Object.class, null);
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error loading midterm report: " + e.getMessage());
+    }
+}
+
+private void loadGradeReportFinal() {
+    String courseFilter = (String) cmbReportCourse.getSelectedItem();
+    String sectionFilter = (String) cmbReportSection.getSelectedItem();
+    
+    StringBuilder sql = new StringBuilder(
+        "SELECT f.student_id, f.full_name, f.subject_code, 'Final' AS period, " +
+        "f.period_rating, f.period_remarks " +
+        "FROM `final` f " +
+        "JOIN students s ON f.student_id = s.student_id " +  // ← only existing students
+        "WHERE 1=1"
+    );
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        sql.append(" AND f.course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        sql.append(" AND f.section = '").append(sectionFilter).append("'");
+    }
+    sql.append(" ORDER BY f.student_id, f.subject_code");
+    
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement();
+         java.sql.ResultSet rs = stmt.executeQuery(sql.toString())) {
+        
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
+            new String[]{"Student ID", "Full Name", "Subject", "Period", "Period Rating", "Period Remarks"}, 0
+        );
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                rs.getString("subject_code"),
+                rs.getString("period"),
+                String.format("%.2f", rs.getDouble("period_rating")),
+                rs.getString("period_remarks")
+            });
+        }
+        tblMystudent3.setModel(model);
+        tblMystudent3.setDefaultEditor(Object.class, null);
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error loading final report: " + e.getMessage());
+    }
+}
+
+private void loadGradeReportFinalAverage() {
+    String courseFilter = (String) cmbReportCourse.getSelectedItem();
+    String sectionFilter = (String) cmbReportSection.getSelectedItem();
+    
+    // Build the sub‑query with JOIN on students so only existing students are included
+    StringBuilder midSql = new StringBuilder(
+        "SELECT m.student_id, m.full_name, m.subject_code, m.period_grade, m.course, m.section " +
+        "FROM midterm m JOIN students s ON m.student_id = s.student_id WHERE 1=1"
+    );
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        midSql.append(" AND m.course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        midSql.append(" AND m.section = '").append(sectionFilter).append("'");
+    }
+    
+    StringBuilder finalSql = new StringBuilder(
+        "SELECT f.student_id, f.full_name, f.subject_code, f.period_grade, f.course, f.section " +
+        "FROM `final` f JOIN students s ON f.student_id = s.student_id WHERE 1=1"
+    );
+    if (courseFilter != null && !courseFilter.equals("All")) {
+        finalSql.append(" AND f.course = '").append(courseFilter).append("'");
+    }
+    if (sectionFilter != null && !sectionFilter.equals("All")) {
+        finalSql.append(" AND f.section = '").append(sectionFilter).append("'");
+    }
+    
+    StringBuilder sql = new StringBuilder(
+        "SELECT combined.student_id, combined.full_name, combined.subject_code, " +
+        "AVG(combined.period_grade) AS avg_grade " +
+        "FROM ( " +
+        midSql.toString() +
+        " UNION ALL " +
+        finalSql.toString() +
+        ") AS combined " +
+        "GROUP BY combined.student_id, combined.full_name, combined.subject_code " +
+        "ORDER BY combined.student_id, combined.subject_code"
+    );
+    
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement();
+         java.sql.ResultSet rs = stmt.executeQuery(sql.toString())) {
+        
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(
+            new String[]{"Student ID", "Full Name", "Subject", "Final Average Rating", "Final Remarks"}, 0
+        );
+        while (rs.next()) {
+            double avgGrade = rs.getDouble("avg_grade");
+            double rating = convertToRating(avgGrade);
+            String remarks = rating <= 3.00 ? "Passed" : "Failed";
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("full_name"),
+                rs.getString("subject_code"),
+                String.format("%.2f", rating),
+                remarks
+            });
+        }
+        tblMystudent3.setModel(model);
+        tblMystudent3.setDefaultEditor(Object.class, null);
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error loading final average report: " + e.getMessage());
+    }
+}
+
+private void printReport() {
+    try {
+        boolean complete = tblMystudent3.print(JTable.PrintMode.FIT_WIDTH);
+        if (complete) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Printing completed.");
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Printing cancelled.", "Print", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
+    } catch (java.awt.print.PrinterException e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Printing failed: " + e.getMessage());
+    }
+}
+
+private void refreshReport() {
+    String selected = cmbReportType.getSelectedItem().toString();
+    switch (selected) {
+        case "Student List":
+            loadStudentListReport();
+            break;
+        case "Attendance Report":
+            loadAttendanceReport();
+            break;
+        case "Grade Report Midterm":
+            loadGradeReportMidterm();
+            break;
+        case "Grade Report Final":
+            loadGradeReportFinal();
+            break;
+        case "Grade Report Final Average":
+            loadGradeReportFinalAverage();
+            break;
+    }
+}
+
+private void loadCoursesAndSectionsForReports() {
+    try (java.sql.Connection conn = DatabaseConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement()) {
+        
+        // Load courses
+        cmbReportCourse.removeAllItems();
+        cmbReportCourse.addItem("All");
+        java.sql.ResultSet rsCourses = stmt.executeQuery("SELECT DISTINCT course FROM students WHERE course IS NOT NULL AND course != ''");
+        while (rsCourses.next()) {
+            cmbReportCourse.addItem(rsCourses.getString("course"));
+        }
+        
+        // Load sections
+        cmbReportSection.removeAllItems();
+        cmbReportSection.addItem("All");
+        java.sql.ResultSet rsSections = stmt.executeQuery("SELECT DISTINCT section FROM students WHERE section IS NOT NULL AND section != ''");
+        while (rsSections.next()) {
+            cmbReportSection.addItem(rsSections.getString("section"));
+        }
+        
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading report filters: " + e.getMessage());
+    }
+}
     /**
      * @param args the command line arguments
      */
@@ -1847,49 +2418,39 @@ private void resetGradesData() {
     private javax.swing.JButton btnAllAbsent;
     private javax.swing.JButton btnAllPresent;
     private javax.swing.JButton btnCompute;
+    private javax.swing.JButton btnGenerate;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnLogout1;
     private javax.swing.JButton btnLogout2;
     private javax.swing.JButton btnLogout3;
     private javax.swing.JButton btnMysearch;
-    private javax.swing.JButton btnMysearch3;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnReset5;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnSave1;
+    private javax.swing.JButton btnSearch21;
     private javax.swing.JButton btnView;
-    private javax.swing.JComboBox<String> cmbCourserecord;
-    private javax.swing.JComboBox<String> cmbCourserecord1;
-    private javax.swing.JComboBox<String> cmbCourserecord2;
-    private javax.swing.JComboBox<String> cmbCourserecord3;
-    private javax.swing.JComboBox<String> cmbCourserecord4;
+    private javax.swing.JComboBox<String> cmbCourseAttendance;
+    private javax.swing.JComboBox<String> cmbCourseGrades;
+    private javax.swing.JComboBox<String> cmbCourseMyStudent;
     private javax.swing.JComboBox<String> cmbPeriod;
-    private javax.swing.JComboBox<String> cmbSection1;
-    private javax.swing.JComboBox<String> cmbSection2;
-    private javax.swing.JComboBox<String> cmbSection4;
-    private javax.swing.JComboBox<String> cmbSection5;
-    private javax.swing.JComboBox<String> cmbSection6;
-    private javax.swing.JComboBox<String> cmbSection7;
-    private javax.swing.JComboBox<String> cmbSection8;
-    private javax.swing.JComboBox<String> cmbSubject;
-    private javax.swing.JComboBox<String> cmbSubject3;
-    private javax.swing.JComboBox<String> cmbSubject4;
-    private javax.swing.JComboBox<String> cmbSubject5;
-    private javax.swing.JComboBox<String> cmbSubject6;
-    private javax.swing.JComboBox<String> cmbSubject7;
+    private javax.swing.JComboBox<String> cmbReportCourse;
+    private javax.swing.JComboBox<String> cmbReportSection;
+    private javax.swing.JComboBox<String> cmbReportType;
+    private javax.swing.JComboBox<String> cmbSectionAttendance;
+    private javax.swing.JComboBox<String> cmbSectionGrades;
     private javax.swing.JComboBox<String> cmbSubject8;
+    private javax.swing.JComboBox<String> cmbSubjectAttendance;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
-    private javax.swing.JPanel jPanel14;
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
-    private javax.swing.JPanel jPanel18;
-    private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel21;
+    private javax.swing.JPanel jPanel22;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
@@ -1905,36 +2466,24 @@ private void resetGradesData() {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel lblAbsent;
     private javax.swing.JLabel lblDate;
-    private javax.swing.JLabel lblDate1;
-    private javax.swing.JLabel lblDate2;
-    private javax.swing.JLabel lblDate3;
     private javax.swing.JLabel lblLate;
     private javax.swing.JLabel lblPresent;
+    private javax.swing.JLabel lblReportType;
+    private javax.swing.JLabel lblReportType1;
+    private javax.swing.JLabel lblReportType2;
     private javax.swing.JLabel lblTitle1;
-    private javax.swing.JLabel lblTitle10;
     private javax.swing.JLabel lblTitle11;
-    private javax.swing.JLabel lblTitle12;
-    private javax.swing.JLabel lblTitle13;
     private javax.swing.JLabel lblTitle14;
     private javax.swing.JLabel lblTitle15;
     private javax.swing.JLabel lblTitle16;
-    private javax.swing.JLabel lblTitle17;
-    private javax.swing.JLabel lblTitle18;
-    private javax.swing.JLabel lblTitle19;
-    private javax.swing.JLabel lblTitle20;
-    private javax.swing.JLabel lblTitle21;
-    private javax.swing.JLabel lblTitle22;
-    private javax.swing.JLabel lblTitle23;
-    private javax.swing.JLabel lblTitle24;
     private javax.swing.JLabel lblTitle25;
     private javax.swing.JLabel lblTitle26;
     private javax.swing.JLabel lblTitle27;
     private javax.swing.JLabel lblTitle28;
-    private javax.swing.JLabel lblTitle3;
+    private javax.swing.JLabel lblTitle29;
     private javax.swing.JLabel lblTitle4;
     private javax.swing.JLabel lblTitle5;
     private javax.swing.JLabel lblTitle6;
-    private javax.swing.JLabel lblTitle9;
     private javax.swing.JLabel lblTotal;
     private javax.swing.JLabel lblTotalstudents1;
     private javax.swing.JPanel panelCenter;
@@ -1947,10 +2496,7 @@ private void resetGradesData() {
     private javax.swing.JTable tblMystudent3;
     private javax.swing.JTable tblRecord;
     private javax.swing.JTextField txtDate;
-    private javax.swing.JTextField txtDate1;
-    private javax.swing.JTextField txtDate2;
-    private javax.swing.JTextField txtDate3;
     private javax.swing.JTextField txtMySearch;
-    private javax.swing.JTextField txtMySearch3;
+    private javax.swing.JTextField txtSearch5;
     // End of variables declaration//GEN-END:variables
 }

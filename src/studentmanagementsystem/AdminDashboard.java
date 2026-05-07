@@ -4,6 +4,12 @@
  */
 package studentmanagementsystem;
 
+import javax.swing.JTable;
+import java.awt.print.PrinterException;
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 /**
  *
  * @author nico
@@ -17,14 +23,23 @@ public class AdminDashboard extends javax.swing.JFrame {
      */
     public AdminDashboard() {
         initComponents();
+        
     setLocationRelativeTo(null);
-    pack();
-    
+    setSize(1022, 670);
+    setResizable(false);
+    setLocationRelativeTo(null);
     setTitle("Student Management System - Admin");
+    
+    btnPrint.addActionListener(e -> printReport()); 
     
     tblStudents.setDefaultEditor(Object.class, null);
     loadStudents();
     loadSubjects();
+    
+     tblStudents2.setModel(new javax.swing.table.DefaultTableModel(
+        new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0
+    ));
+    tblStudents2.setDefaultEditor(Object.class, null);
     }
 
     /**
@@ -49,14 +64,14 @@ public class AdminDashboard extends javax.swing.JFrame {
         lblEmail = new javax.swing.JLabel();
         txtStudentID = new javax.swing.JTextField();
         txtFullName = new javax.swing.JTextField();
-        txtCourse = new javax.swing.JTextField();
-        txtEmail = new javax.swing.JTextField();
+        txtSection = new javax.swing.JTextField();
         btnAdd = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
-        cmbSection = new javax.swing.JComboBox<>();
+        cmbCourse = new javax.swing.JComboBox<>();
+        txtEmail1 = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -71,11 +86,9 @@ public class AdminDashboard extends javax.swing.JFrame {
         lblFullName1 = new javax.swing.JLabel();
         lblCourse1 = new javax.swing.JLabel();
         lblSection1 = new javax.swing.JLabel();
-        lblEmail1 = new javax.swing.JLabel();
         txtStudentID1 = new javax.swing.JTextField();
         txtFullName1 = new javax.swing.JTextField();
         txtCourse1 = new javax.swing.JTextField();
-        txtSection1 = new javax.swing.JTextField();
         btnAdd1 = new javax.swing.JButton();
         btnDelete1 = new javax.swing.JButton();
         btnUpdate1 = new javax.swing.JButton();
@@ -83,7 +96,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         btnLogout1 = new javax.swing.JButton();
         lblEmail3 = new javax.swing.JLabel();
         jComboBox2 = new javax.swing.JComboBox<>();
-        jComboBox3 = new javax.swing.JComboBox<>();
+        cmbCourse2 = new javax.swing.JComboBox<>();
         jPanel5 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -98,9 +111,13 @@ public class AdminDashboard extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         btnSearch2 = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox<>();
+        btnPrint = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+        cmbCourse0 = new javax.swing.JComboBox<>();
         jPanel10 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblStudents2 = new javax.swing.JTable();
+        btnLogout2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(800, 600));
@@ -180,52 +197,58 @@ public class AdminDashboard extends javax.swing.JFrame {
         btnLogout.setText("Logout");
         btnLogout.addActionListener(this::btnLogoutActionPerformed);
 
-        cmbSection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "2M" }));
+        cmbCourse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "BSIT", "BSCS", "ACT" }));
 
         javax.swing.GroupLayout panelInputLayout = new javax.swing.GroupLayout(panelInput);
         panelInput.setLayout(panelInputLayout);
         panelInputLayout.setHorizontalGroup(
             panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(lblCourse, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lblSection, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(lblEmail))
+                        .addGap(35, 35, 35)
+                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelInputLayout.createSequentialGroup()
+                                .addComponent(txtEmail1, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtSection, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(cmbCourse, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(31, 31, 31))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addGroup(panelInputLayout.createSequentialGroup()
+                                        .addComponent(lblFullName)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(panelInputLayout.createSequentialGroup()
+                                        .addComponent(lblStudentID)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(34, 34, 34))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
+                                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(panelInputLayout.createSequentialGroup()
+                                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(panelInputLayout.createSequentialGroup()
+                                        .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(31, 31, 31))))))
             .addGroup(panelInputLayout.createSequentialGroup()
                 .addGap(14, 14, 14)
                 .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
-                .addContainerGap(17, Short.MAX_VALUE)
-                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
-                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(panelInputLayout.createSequentialGroup()
-                                .addComponent(lblFullName)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelInputLayout.createSequentialGroup()
-                                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(lblCourse, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(lblSection, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addComponent(lblEmail))
-                                .addGap(35, 35, 35)
-                                .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtCourse)
-                                    .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(cmbSection, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addGroup(panelInputLayout.createSequentialGroup()
-                                .addComponent(lblStudentID)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(34, 34, 34))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInputLayout.createSequentialGroup()
-                        .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(panelInputLayout.createSequentialGroup()
-                                .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelInputLayout.createSequentialGroup()
-                                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(31, 31, 31))))
         );
         panelInputLayout.setVerticalGroup(
             panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -243,25 +266,25 @@ public class AdminDashboard extends javax.swing.JFrame {
                         .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblCourse))
+                    .addComponent(lblCourse)
+                    .addComponent(cmbCourse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSection)
-                    .addComponent(cmbSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtSection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblEmail)
-                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(30, 30, 30)
+                    .addComponent(txtEmail1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUpdate)
                     .addComponent(btnAdd))
-                .addGap(30, 30, 30)
+                .addGap(34, 34, 34)
                 .addGroup(panelInputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnClear)
-                    .addComponent(btnDelete))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 163, Short.MAX_VALUE)
+                    .addComponent(btnDelete)
+                    .addComponent(btnClear))
+                .addGap(129, 129, 129)
                 .addComponent(btnLogout)
                 .addGap(14, 14, 14))
         );
@@ -415,9 +438,6 @@ public class AdminDashboard extends javax.swing.JFrame {
         lblSection1.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         lblSection1.setText("Course:");
 
-        lblEmail1.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        lblEmail1.setText("Year level:");
-
         btnAdd1.setBackground(new java.awt.Color(0, 255, 0));
         btnAdd1.setText("Add");
         btnAdd1.addActionListener(this::btnAdd1ActionPerformed);
@@ -444,15 +464,15 @@ public class AdminDashboard extends javax.swing.JFrame {
         lblEmail3.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         lblEmail3.setText("Semester:");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1st Semester", "2nd Semester", " " }));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "1st Semester", "2nd Semester", " " }));
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1st year", "2nd year", "3rd year", "4th year" }));
+        cmbCourse2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "ACT", "BSCS", "BSIT" }));
 
         javax.swing.GroupLayout panelInput1Layout = new javax.swing.GroupLayout(panelInput1);
         panelInput1.setLayout(panelInput1Layout);
         panelInput1Layout.setHorizontalGroup(
             panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInput1Layout.createSequentialGroup()
+            .addGroup(panelInput1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInput1Layout.createSequentialGroup()
@@ -475,22 +495,24 @@ public class AdminDashboard extends javax.swing.JFrame {
                             .addComponent(btnUpdate1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(btnClear1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(31, 31, 31))
-                    .addGroup(panelInput1Layout.createSequentialGroup()
-                        .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(lblCourse1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(lblSection1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(lblEmail1, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelInput1Layout.createSequentialGroup()
+                        .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(panelInput1Layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(btnLogout1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(lblEmail3))
-                        .addGap(11, 11, 11)
-                        .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSection1)
-                            .addComponent(txtCourse1)
-                            .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBox3, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(lblEmail3, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(29, 29, 29)
+                                .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(panelInput1Layout.createSequentialGroup()
+                                .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(lblCourse1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lblSection1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addGroup(panelInput1Layout.createSequentialGroup()
+                                        .addGap(8, 8, 8)
+                                        .addComponent(btnLogout1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(11, 11, 11)
+                                .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtCourse1)
+                                    .addComponent(cmbCourse2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addGap(34, 34, 34))))
         );
         panelInput1Layout.setVerticalGroup(
@@ -511,16 +533,12 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSection1)
-                    .addComponent(txtSection1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(cmbCourse2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
                 .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblEmail1)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblEmail3)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(44, 44, 44)
+                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblEmail3))
+                .addGap(59, 59, 59)
                 .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUpdate1)
                     .addComponent(btnAdd1))
@@ -528,7 +546,7 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGroup(panelInput1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDelete1)
                     .addComponent(btnClear1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 117, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 109, Short.MAX_VALUE)
                 .addComponent(btnLogout1)
                 .addGap(14, 14, 14))
         );
@@ -585,17 +603,17 @@ public class AdminDashboard extends javax.swing.JFrame {
 
         tblSubjects.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Code", "Subject Name", "Units", "Course", "Year level", "Semeter"
+                "Code", "Subject Name", "Units", "Course", "Semester"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -683,10 +701,20 @@ public class AdminDashboard extends javax.swing.JFrame {
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Report Type:");
 
+        btnSearch2.setBackground(new java.awt.Color(102, 255, 51));
         btnSearch2.setText("Generate");
         btnSearch2.addActionListener(this::btnSearch2ActionPerformed);
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Student List", "Enrollment by Course", "Midterm Grades", "Final Grades" }));
+
+        btnPrint.setBackground(new java.awt.Color(204, 204, 204));
+        btnPrint.setText("Print");
+
+        jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Course:");
+
+        cmbCourse0.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "ACT", "BSCS", "BSIT", " " }));
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -698,18 +726,31 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbCourse0, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 123, Short.MAX_VALUE)
                 .addComponent(btnSearch2, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(509, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSearch2)
                     .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cmbCourse0, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(10, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSearch2)
+                    .addComponent(btnPrint))
+                .addContainerGap())
         );
 
         jPanel10.setBackground(new java.awt.Color(102, 153, 255));
@@ -746,9 +787,14 @@ public class AdminDashboard extends javax.swing.JFrame {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
+
+        btnLogout2.setBackground(new java.awt.Color(255, 0, 51));
+        btnLogout2.setForeground(new java.awt.Color(255, 255, 255));
+        btnLogout2.setText("Logout");
+        btnLogout2.addActionListener(this::btnLogout2ActionPerformed);
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
@@ -757,9 +803,15 @@ public class AdminDashboard extends javax.swing.JFrame {
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(btnLogout2, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -767,8 +819,10 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnLogout2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
@@ -806,8 +860,8 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(panelTop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTabbedPane1)
-                .addContainerGap())
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 537, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         getContentPane().add(panelCenter, java.awt.BorderLayout.CENTER);
@@ -821,37 +875,49 @@ public class AdminDashboard extends javax.swing.JFrame {
         if(row >= 0){
             txtStudentID.setText(tblStudents.getValueAt(row, 0).toString());
             txtFullName.setText(tblStudents.getValueAt(row, 1).toString());
-            txtCourse.setText(tblStudents.getValueAt(row, 2).toString());
-            cmbSection.setSelectedItem(tblStudents.getValueAt(row, 3).toString());
-            txtEmail.setText(tblStudents.getValueAt(row, 4).toString());
+            cmbCourse.setSelectedItem(tblStudents.getValueAt(row, 2).toString());
+            txtSection.setText(tblStudents.getValueAt(row, 3).toString());
+            txtEmail1.setText(tblStudents.getValueAt(row, 4).toString());
         }
     }//GEN-LAST:event_tblStudentsMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        // TODO add your handling code here:
-        if(txtStudentID.getText().isEmpty() || txtFullName.getText().isEmpty()){
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "Student ID and Full Name are required!");
-            return;
-        }
-        try {
-            java.sql.Connection conn = getConnection();
-            String sql = "INSERT INTO students (student_id, full_name, course, section, email) VALUES (?,?,?,?,?)";
-            java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, txtStudentID.getText());
-            pst.setString(2, txtFullName.getText());
-            pst.setString(3, txtCourse.getText());
-            pst.setString(4, cmbSection.getSelectedItem().toString());
-            pst.setString(5, txtEmail.getText());
-            pst.executeUpdate();
-            javax.swing.JOptionPane.showMessageDialog(this, "Student added successfully!");
-            loadStudents();
-            clearFields();
-            conn.close();
-        } catch(Exception e){
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "Error: " + e.getMessage());
-        }
+         if(txtStudentID.getText().isEmpty() || txtFullName.getText().isEmpty()){
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Student ID and Full Name are required!");
+        return;
+    }
+    try {
+        java.sql.Connection conn = getConnection();
+        
+        // 1. Insert into students table
+        String sqlStudent = "INSERT INTO students (student_id, full_name, course, section, email) VALUES (?,?,?,?,?)";
+        java.sql.PreparedStatement pstStudent = conn.prepareStatement(sqlStudent);
+        pstStudent.setString(1, txtStudentID.getText());
+        pstStudent.setString(2, txtFullName.getText());
+        pstStudent.setString(3, cmbCourse.getSelectedItem().toString());
+        pstStudent.setString(4, txtSection.getText());
+        pstStudent.setString(5, txtEmail1.getText());
+        pstStudent.executeUpdate();
+        
+        // 2. Insert into users table (only username, password, role) - NO student_id column
+        String sqlUser = "INSERT INTO users (username, password, role) VALUES (?, ?, 'student')";
+        java.sql.PreparedStatement pstUser = conn.prepareStatement(sqlUser);
+        pstUser.setString(1, txtStudentID.getText());   // username = Student ID
+        pstUser.setString(2, "password123");            // default password
+        pstUser.executeUpdate();
+        
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Student added successfully!\n\nLogin credentials:\nUsername: " + txtStudentID.getText() + "\nPassword: password123");
+        
+        loadStudents();
+        clearFields();
+        conn.close();
+        
+    } catch(Exception e){
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Error: " + e.getMessage());
+    }
     }//GEN-LAST:event_btnAddActionPerformed
 
     
@@ -899,47 +965,139 @@ try {
     private void clearFields() {
     txtStudentID.setText("");
     txtFullName.setText("");
-    txtCourse.setText("");
-    cmbSection.setSelectedItem(null);
-    txtEmail.setText("");
+    cmbCourse.setSelectedItem(null);
+    txtSection.setText("");
+    txtEmail1.setText("");
 }
     
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
-        if(txtStudentID.getText().isEmpty()){
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "Please select a student to delete!");
-            return;
-        }
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to delete this student?",
-            "Delete", javax.swing.JOptionPane.YES_NO_OPTION);
-        if(confirm == javax.swing.JOptionPane.YES_OPTION){
-            try {
-                java.sql.Connection conn = getConnection();
-                String sql = "DELETE FROM students WHERE student_id=?";
-                java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-                pst.setString(1, txtStudentID.getText());
-                pst.executeUpdate();
-                javax.swing.JOptionPane.showMessageDialog(this,
-                    "Student deleted successfully!");
-                loadStudents();
-                clearFields();
-                conn.close();
-            } catch(Exception e){
-                if(e.getMessage().contains("foreign key constraint")){
-                    javax.swing.JOptionPane.showMessageDialog(this,
-                        "Cannot delete this student!\nThis student has existing attendance or grade records.",
-                        "Delete Failed",
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
-                } else {
-                    javax.swing.JOptionPane.showMessageDialog(this,
-                        "Error: " + e.getMessage(),
-                        "Error",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
-                }
+        if (txtStudentID.getText().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please select a student to delete!");
+        return;
+    }
+
+    String studentId = txtStudentID.getText().trim();
+
+    // Count related records first
+    int attendanceCount = 0, midtermCount = 0, finalCount = 0, userCount = 0;
+    try (Connection conn = getConnection()) {
+        // Count attendance
+        try (PreparedStatement pst = conn.prepareStatement(
+                "SELECT COUNT(*) FROM attendance WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) attendanceCount = rs.getInt(1);
             }
         }
+
+        // Count midterm
+        try (PreparedStatement pst = conn.prepareStatement(
+                "SELECT COUNT(*) FROM midterm WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) midtermCount = rs.getInt(1);
+            }
+        }
+
+        // Count final (use backticks around 'final' because it's a reserved word)
+        try (PreparedStatement pst = conn.prepareStatement(
+                "SELECT COUNT(*) FROM `final` WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) finalCount = rs.getInt(1);
+            }
+        }
+
+        // Count users
+        try (PreparedStatement pst = conn.prepareStatement(
+                "SELECT COUNT(*) FROM users WHERE username = ?")) {
+            pst.setString(1, studentId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) userCount = rs.getInt(1);
+            }
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Error checking related records: " + e.getMessage(),
+            "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Build warning message
+    StringBuilder msg = new StringBuilder("Are you sure you want to delete this student?\n");
+    msg.append("Student ID: ").append(studentId).append("\n\n");
+    if (attendanceCount > 0)
+        msg.append("• ").append(attendanceCount).append(" attendance record(s) will be deleted.\n");
+    if (midtermCount > 0)
+        msg.append("• ").append(midtermCount).append(" midterm grade(s) will be deleted.\n");
+    if (finalCount > 0)
+        msg.append("• ").append(finalCount).append(" final grade(s) will be deleted.\n");
+    if (userCount > 0)
+        msg.append("• ").append(userCount).append(" user account will be deleted.\n");
+    msg.append("\nThis action cannot be undone. Proceed?");
+
+    int confirm = JOptionPane.showConfirmDialog(this,
+        msg.toString(),
+        "Delete Student & All Related Data",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE);
+
+    if (confirm != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    // Perform deletion in a transaction
+    try (Connection conn = getConnection()) {
+        conn.setAutoCommit(false); // start transaction
+
+        // 1. Delete from attendance
+        try (PreparedStatement pst = conn.prepareStatement(
+                "DELETE FROM attendance WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            pst.executeUpdate();
+        }
+
+        // 2. Delete from midterm
+        try (PreparedStatement pst = conn.prepareStatement(
+                "DELETE FROM midterm WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            pst.executeUpdate();
+        }
+
+        // 3. Delete from final (use backticks)
+        try (PreparedStatement pst = conn.prepareStatement(
+                "DELETE FROM `final` WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            pst.executeUpdate();
+        }
+
+        // 4. Delete from users
+        try (PreparedStatement pst = conn.prepareStatement(
+                "DELETE FROM users WHERE username = ?")) {
+            pst.setString(1, studentId);
+            pst.executeUpdate();
+        }
+
+        // 5. Finally, delete the student
+        try (PreparedStatement pst = conn.prepareStatement(
+                "DELETE FROM students WHERE student_id = ?")) {
+            pst.setString(1, studentId);
+            pst.executeUpdate();
+        }
+
+        conn.commit(); // all good
+        JOptionPane.showMessageDialog(this,
+            "Student and all related records deleted successfully.");
+
+        loadStudents();  // refresh table
+        clearFields();
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Error during deletion: " + e.getMessage(),
+            "Delete Failed", JOptionPane.ERROR_MESSAGE);
+        // If any error occurs, the transaction would be rolled back because we never committed
+    }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void searchStudents(String keyword) {
@@ -1036,9 +1194,9 @@ try {
                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
                 pst.setString(1, txtStudentID.getText());
                 pst.setString(2, txtFullName.getText());
-                pst.setString(3, txtCourse.getText());
-                pst.setString(4, cmbSection.getSelectedItem().toString());
-                pst.setString(5, txtEmail.getText());
+                pst.setString(3, cmbCourse.getSelectedItem().toString());
+                pst.setString(4, txtSection.getText());
+                pst.setString(5, txtEmail1.getText());
                 pst.setString(6, originalID);
                 pst.executeUpdate();
 
@@ -1049,9 +1207,9 @@ try {
                 String sql = "UPDATE students SET full_name=?, course=?, section=?, email=? WHERE student_id=?";
                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
                 pst.setString(1, txtFullName.getText());
-                pst.setString(2, txtCourse.getText());
-                pst.setString(3, cmbSection.getSelectedItem().toString());
-                pst.setString(4, txtEmail.getText());
+                pst.setString(2, cmbCourse.getSelectedItem().toString());
+                pst.setString(3, txtSection.getText());
+                pst.setString(4, txtEmail1.getText());
                 pst.setString(5, originalID);
                 pst.executeUpdate();
             }
@@ -1110,120 +1268,17 @@ try {
     // THESE ARE FOR SUBJECTS METHODSSSS ***************************************************************************************************************
     
     
-    private void btnAdd1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdd1ActionPerformed
-        // TODO add your handling code here:
-         try {
-        java.sql.Connection conn = getConnection();
-
-        String sql = "INSERT INTO subjects (subject_code, subject_name, units, course, year_level, semester) VALUES (?,?,?,?,?,?)";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-
-        pst.setString(1, txtStudentID1.getText()); // subject_code
-        pst.setString(2, txtFullName1.getText());  // subject_name
-        pst.setInt(3, Integer.parseInt(txtCourse1.getText())); // units
-        pst.setString(4, txtSection1.getText()); // course
-        pst.setString(5, jComboBox3.getSelectedItem().toString()); // year
-        pst.setString(6, jComboBox2.getSelectedItem().toString()); // semester
-
-        pst.executeUpdate();
-
-        javax.swing.JOptionPane.showMessageDialog(this, "Subject Added!");
-        loadSubjects();
-        clearSubjectFields();
-
-        conn.close();
-
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this, e.getMessage());
-    }
-    }//GEN-LAST:event_btnAdd1ActionPerformed
-
-    private void btnDelete1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelete1ActionPerformed
-        // TODO add your handling code here:
-          try {
-        java.sql.Connection conn = getConnection();
-
-        String sql = "DELETE FROM subjects WHERE subject_code=?";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-
-        pst.setString(1, txtStudentID1.getText());
-        pst.executeUpdate();
-
-        javax.swing.JOptionPane.showMessageDialog(this, "Deleted!");
-        loadSubjects();
-        clearSubjectFields();
-
-        conn.close();
-
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this, e.getMessage());
-    }
-    }//GEN-LAST:event_btnDelete1ActionPerformed
-
-    private void btnUpdate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdate1ActionPerformed
-        // TODO add your handling code here:
-        try {
-        java.sql.Connection conn = getConnection();
-
-        String sql = "UPDATE subjects SET subject_name=?, units=?, course=?, year_level=?, semester=? WHERE subject_code=?";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-
-        pst.setString(1, txtFullName1.getText());
-        pst.setInt(2, Integer.parseInt(txtCourse1.getText()));
-        pst.setString(3, txtSection1.getText());
-        pst.setString(4, jComboBox3.getSelectedItem().toString());
-        pst.setString(5, jComboBox2.getSelectedItem().toString());
-        pst.setString(6, txtStudentID1.getText());
-
-        pst.executeUpdate();
-
-        javax.swing.JOptionPane.showMessageDialog(this, "Updated!");
-        loadSubjects();
-        clearSubjectFields();
-
-        conn.close();
-
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this, e.getMessage());
-    }
-    }//GEN-LAST:event_btnUpdate1ActionPerformed
-
-    private void btnClear1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClear1ActionPerformed
-        // TODO add your handling code here:
-         clearSubjectFields();
-}
-
-private void clearSubjectFields() {
-    txtStudentID1.setText("");
-    txtFullName1.setText("");
-    txtCourse1.setText("");
-    txtSection1.setText("");
-    jComboBox2.setSelectedIndex(0);
-    jComboBox3.setSelectedIndex(0);
-    }//GEN-LAST:event_btnClear1ActionPerformed
-
-    private void btnLogout1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogout1ActionPerformed
-        // TODO add your handling code here:
-         int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to logout?",
-            "Logout",
-            javax.swing.JOptionPane.YES_NO_OPTION);
-        if(confirm == javax.swing.JOptionPane.YES_OPTION){
-            new LoginForm().setVisible(true);
-            this.dispose();
-        }
-    }//GEN-LAST:event_btnLogout1ActionPerformed
-
     private void tblSubjectsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblSubjectsMouseClicked
         // TODO add your handling code here:
-         int row = tblSubjects.getSelectedRow();
-
-    txtStudentID1.setText(tblSubjects.getValueAt(row, 0).toString());
-    txtFullName1.setText(tblSubjects.getValueAt(row, 1).toString());
-    txtCourse1.setText(tblSubjects.getValueAt(row, 2).toString());
-    txtSection1.setText(tblSubjects.getValueAt(row, 3).toString());
-    jComboBox3.setSelectedItem(tblSubjects.getValueAt(row, 4).toString());
-    jComboBox2.setSelectedItem(tblSubjects.getValueAt(row, 5).toString());
+   int row = tblSubjects.getSelectedRow();
+    if (row >= 0) {
+        txtStudentID1.setText(tblSubjects.getValueAt(row, 0).toString());
+        txtFullName1.setText(tblSubjects.getValueAt(row, 1).toString());
+        txtCourse1.setText(tblSubjects.getValueAt(row, 2).toString());
+        cmbCourse2.setSelectedItem(tblSubjects.getValueAt(row, 3).toString());
+        jComboBox2.setSelectedItem(tblSubjects.getValueAt(row, 4).toString());
+        // No year_level column any more
+    }
     }//GEN-LAST:event_tblSubjectsMouseClicked
 
     private void txtSearchSubjectsKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchSubjectsKeyReleased
@@ -1232,40 +1287,33 @@ private void clearSubjectFields() {
 
     private void btnSearchSubjectsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchSubjectsActionPerformed
         // TODO add your handling code here:
-         try {
-        java.sql.Connection conn = getConnection();
-
+       try {
+        Connection conn = getConnection();
         String keyword = txtSearchSubjects.getText();
-
-        String sql = "SELECT * FROM subjects WHERE subject_code LIKE ? OR subject_name LIKE ?";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-
+        String sql = "SELECT subject_code, subject_name, units, course, semester FROM subjects WHERE subject_code LIKE ? OR subject_name LIKE ?";
+        PreparedStatement pst = conn.prepareStatement(sql);
         pst.setString(1, "%" + keyword + "%");
         pst.setString(2, "%" + keyword + "%");
-
-        java.sql.ResultSet rs = pst.executeQuery();
+        ResultSet rs = pst.executeQuery();
 
         javax.swing.table.DefaultTableModel model =
             new javax.swing.table.DefaultTableModel(
-                new String[]{"Code", "Subject Name", "Units", "Course", "Year", "Semester"}, 0
+                new String[]{"Code", "Subject Name", "Units", "Course", "Semester"}, 0
             );
 
-        while(rs.next()){
+        while (rs.next()) {
             model.addRow(new Object[]{
                 rs.getString("subject_code"),
                 rs.getString("subject_name"),
                 rs.getInt("units"),
                 rs.getString("course"),
-                rs.getString("year_level"),
                 rs.getString("semester")
             });
         }
-
         tblSubjects.setModel(model);
         conn.close();
-
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this, e.getMessage());
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
     }
     }//GEN-LAST:event_btnSearchSubjectsActionPerformed
 
@@ -1276,9 +1324,10 @@ private void clearSubjectFields() {
     private void btnSearch2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearch2ActionPerformed
         // TODO add your handling code here:
         String selectedReport = jComboBox1.getSelectedItem().toString();
+    String courseFilter = cmbCourse0.getSelectedItem().toString();
 
     if(selectedReport.equals("Student List")) {
-        loadStudentListReport();
+        loadStudentListReport(courseFilter);
     } else {
         javax.swing.JOptionPane.showMessageDialog(this,
             "Please select 'Student List' from the dropdown.",
@@ -1291,28 +1340,125 @@ private void clearSubjectFields() {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSearchStudentActionPerformed
 
+    private void btnLogout2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogout2ActionPerformed
+        // TODO add your handling code here:
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to logout?",
+            "Logout",
+            javax.swing.JOptionPane.YES_NO_OPTION);
+        if(confirm == javax.swing.JOptionPane.YES_OPTION){
+            new LoginForm().setVisible(true);
+            this.dispose();
+        }
+    }//GEN-LAST:event_btnLogout2ActionPerformed
+
+    private void btnLogout1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogout1ActionPerformed
+        // TODO add your handling code here:
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+            "Are you sure you want to logout?",
+            "Logout",
+            javax.swing.JOptionPane.YES_NO_OPTION);
+        if(confirm == javax.swing.JOptionPane.YES_OPTION){
+            new LoginForm().setVisible(true);
+            this.dispose();
+        }
+    }//GEN-LAST:event_btnLogout1ActionPerformed
+
+    private void btnClear1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClear1ActionPerformed
+        // TODO add your handling code here:
+        clearSubjectFields();
+        }
+
+        private void clearSubjectFields() {
+            txtStudentID1.setText("");
+            txtFullName1.setText("");
+            txtCourse1.setText("");
+            cmbCourse.setSelectedIndex(0);
+            jComboBox2.setSelectedIndex(0);
+    }//GEN-LAST:event_btnClear1ActionPerformed
+
+    private void btnUpdate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdate1ActionPerformed
+        // TODO add your handling code here:
+       try {
+        Connection conn = getConnection();
+        // No more year_level
+        String sql = "UPDATE subjects SET subject_name=?, units=?, course=?, semester=? WHERE subject_code=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, txtFullName1.getText());            // subject_name
+        pst.setInt(2, Integer.parseInt(txtCourse1.getText())); // units
+        pst.setString(3, cmbCourse2.getSelectedItem().toString()); // course
+        pst.setString(4, jComboBox2.getSelectedItem().toString()); // semester
+        pst.setString(5, txtStudentID1.getText());           // subject_code (WHERE)
+        pst.executeUpdate();
+        JOptionPane.showMessageDialog(this, "Updated!");
+        loadSubjects();
+        clearSubjectFields();
+        conn.close();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
+    }
+    }//GEN-LAST:event_btnUpdate1ActionPerformed
+
+    private void btnDelete1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelete1ActionPerformed
+        // TODO add your handling code here:
+         try {
+        Connection conn = getConnection();
+        String sql = "DELETE FROM subjects WHERE subject_code=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, txtStudentID1.getText());
+        pst.executeUpdate();
+        JOptionPane.showMessageDialog(this, "Deleted!");
+        loadSubjects();
+        clearSubjectFields();
+        conn.close();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
+    }
+    }//GEN-LAST:event_btnDelete1ActionPerformed
+
+    private void btnAdd1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdd1ActionPerformed
+        // TODO add your handling code here:
+        try {
+        Connection conn = getConnection();
+        String sql = "INSERT INTO subjects (subject_code, subject_name, units, course, semester) VALUES (?,?,?,?,?)";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, txtStudentID1.getText());     // subject_code
+        pst.setString(2, txtFullName1.getText());      // subject_name
+        pst.setInt(3, Integer.parseInt(txtCourse1.getText())); // units
+        pst.setString(4, cmbCourse2.getSelectedItem().toString()); // course
+        pst.setString(5, jComboBox2.getSelectedItem().toString()); // semester
+        pst.executeUpdate();
+        JOptionPane.showMessageDialog(this, "Subject Added!");
+        loadSubjects();
+        clearSubjectFields();
+        conn.close();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
+    }
+    }//GEN-LAST:event_btnAdd1ActionPerformed
+
    //  THIS IS FOR SUBJECT CODE METHODDD **************************************************************************************
 
     // LOAD SUBJECTS
 private void loadSubjects() {
     try {
-        java.sql.Connection conn = getConnection();
-        String sql = "SELECT * FROM subjects";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-        java.sql.ResultSet rs = pst.executeQuery();
+        Connection conn = getConnection();
+        String sql = "SELECT subject_code, subject_name, units, course, semester FROM subjects";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        ResultSet rs = pst.executeQuery();
 
+        // 5 columns: Code, Subject Name, Units, Course, Semester
         javax.swing.table.DefaultTableModel model =
             new javax.swing.table.DefaultTableModel(
-                new String[]{"Code", "Subject Name", "Units", "Course", "Year", "Semester"}, 0
+                new String[]{"Code", "Subject Name", "Units", "Course", "Semester"}, 0
             );
 
-        while(rs.next()){
+        while (rs.next()) {
             model.addRow(new Object[]{
                 rs.getString("subject_code"),
                 rs.getString("subject_name"),
                 rs.getInt("units"),
                 rs.getString("course"),
-                rs.getString("year_level"),
                 rs.getString("semester")
             });
         }
@@ -1320,28 +1466,35 @@ private void loadSubjects() {
         tblSubjects.setModel(model);
         tblSubjects.setDefaultEditor(Object.class, null);
         conn.close();
-
-    } catch(Exception e){
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "Error loading subjects: " + e.getMessage());
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error loading subjects: " + e.getMessage());
     }
 }
 
 
 // this code for view reports *****************************************************************************
 
-private void loadStudentListReport() {
+private void loadStudentListReport(String courseFilter) {
     try {
         java.sql.Connection conn = getConnection();
-        String sql = "SELECT student_id, full_name, course, section, email FROM students";
-        java.sql.PreparedStatement pst = conn.prepareStatement(sql);
+        String sql;
+        java.sql.PreparedStatement pst;
+        
+        if (courseFilter.equals("All")) {
+            sql = "SELECT student_id, full_name, course, section, email FROM students";
+            pst = conn.prepareStatement(sql);
+        } else {
+            sql = "SELECT student_id, full_name, course, section, email FROM students WHERE course = ?";
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, courseFilter);
+        }
+        
         java.sql.ResultSet rs = pst.executeQuery();
-
         javax.swing.table.DefaultTableModel model = 
             new javax.swing.table.DefaultTableModel(
                 new String[]{"Student ID", "Full Name", "Course", "Section", "Email"}, 0
             );
-
+        
         while(rs.next()){
             model.addRow(new Object[]{
                 rs.getString("student_id"),
@@ -1351,17 +1504,49 @@ private void loadStudentListReport() {
                 rs.getString("email")
             });
         }
-
+        
         tblStudents2.setModel(model);
         tblStudents2.setDefaultEditor(Object.class, null);
         conn.close();
         
-        System.out.println("Report loaded: " + model.getRowCount() + " students found.");
-
+        System.out.println("Report loaded: " + model.getRowCount() + " students found (filter: " + courseFilter + ")");
+        
     } catch(Exception e){
         javax.swing.JOptionPane.showMessageDialog(this, 
             "Error loading student list: " + e.getMessage(),
             "Report Error",
+            javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+
+private void printReport() {
+    // Prevent printing if there is no data
+    if (tblStudents2.getRowCount() == 0) {
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "No data to print.\nPlease generate a report first using the 'Generate' button.",
+            "Print Error",
+            javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    try {
+        boolean complete = tblStudents2.print(JTable.PrintMode.FIT_WIDTH);
+        if (complete) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Printing completed successfully.");
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Printing was cancelled.", "Print", 
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
+    } catch (java.awt.print.PrinterException e) {
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Printer error: " + e.getMessage() + "\nPlease check your printer settings.",
+            "Print Failed",
+            javax.swing.JOptionPane.ERROR_MESSAGE);
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Unexpected error while printing: " + e.getMessage(),
+            "Error",
             javax.swing.JOptionPane.ERROR_MESSAGE);
     }
 }
@@ -1402,18 +1587,22 @@ private void loadStudentListReport() {
     private javax.swing.JButton btnDelete1;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnLogout1;
+    private javax.swing.JButton btnLogout2;
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSearch2;
     private javax.swing.JButton btnSearchStudent;
     private javax.swing.JButton btnSearchSubjects;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnUpdate1;
-    private javax.swing.JComboBox<String> cmbSection;
+    private javax.swing.JComboBox<String> cmbCourse;
+    private javax.swing.JComboBox<String> cmbCourse0;
+    private javax.swing.JComboBox<String> cmbCourse2;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
@@ -1433,7 +1622,6 @@ private void loadStudentListReport() {
     private javax.swing.JLabel lblCourse;
     private javax.swing.JLabel lblCourse1;
     private javax.swing.JLabel lblEmail;
-    private javax.swing.JLabel lblEmail1;
     private javax.swing.JLabel lblEmail3;
     private javax.swing.JLabel lblFullName;
     private javax.swing.JLabel lblFullName1;
@@ -1449,14 +1637,13 @@ private void loadStudentListReport() {
     private javax.swing.JTable tblStudents;
     private javax.swing.JTable tblStudents2;
     private javax.swing.JTable tblSubjects;
-    private javax.swing.JTextField txtCourse;
     private javax.swing.JTextField txtCourse1;
-    private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtEmail1;
     private javax.swing.JTextField txtFullName;
     private javax.swing.JTextField txtFullName1;
     private javax.swing.JTextField txtSearchStudent;
     private javax.swing.JTextField txtSearchSubjects;
-    private javax.swing.JTextField txtSection1;
+    private javax.swing.JTextField txtSection;
     private javax.swing.JTextField txtStudentID;
     private javax.swing.JTextField txtStudentID1;
     // End of variables declaration//GEN-END:variables
